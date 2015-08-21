@@ -1,0 +1,4 @@
+extern Uint8 	shiftDatIdx[80];				//[4x20] rowD->C->B->A and [2x20] rowD->A : shiftDatIdx[1..40]
+
+extern unsigned char TC2002A_Startup_mode;
+extern unsigned char TC2002A_Tx_time;

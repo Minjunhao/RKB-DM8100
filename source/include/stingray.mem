@@ -1,0 +1,90 @@
+#define STATUS_SIZE 			60		//20110907 (100=>60)
+#define STATIONNAME_MAX_SIZE 	40
+
+#ifdef STINGRAY_UTF8_4321
+union uUTF8DISP  uScreenUTF8Reading;	//20100511
+union uUTF8DISP  uScreenUTF8;			//20100511
+union uUTF8DISP  uAdjCurrentUTF8;		//20100915
+union uUTF8DISP  uCurrentScreenUTF8;	//20100915
+#endif
+
+union uTDISP  uScreenReading;
+union uTDISP  uScreen;
+union uTDISP  uAdjCurrent;
+union uTDISP  uCurrentScreen;
+
+volatile byte Stingray_Startup_mode;
+volatile byte_flags Stingray_RxStatus;
+#define f_Tx_Key_Ready			Stingray_RxStatus.byte_bit.bit0
+#define f_ACK_Key_OK			Stingray_RxStatus.byte_bit.bit1
+#define f_Screen_Key_OK			Stingray_RxStatus.byte_bit.bit2
+
+
+volatile byte tx_ST_buf[502];				//20101104
+volatile byte tx_ASCII_buf[1005];		//20101104
+volatile byte Stingray_Tx_mode;
+volatile byte Stingray_Tx_mode_SN;
+volatile word Stingray_Tx_time;
+volatile byte Stingray_Tx_step;
+volatile byte Stingray_ACK_mode;
+volatile byte Stingray_ACK_mode_ID;
+volatile byte Stingray_ACK_mode_SN;
+volatile byte Stingray_ACK_status;
+volatile byte Stingray_ACK_ScreenIconsBuf[2];
+volatile byte Stingray_ACK_ScreenLine0Buf[STATUS_SIZE];		//line1
+volatile byte Stingray_ACK_ScreenLine1Buf[STATUS_SIZE];		//line2
+volatile byte Stingray_ACK_ScreenLine2Buf[STATUS_SIZE];		//line3
+volatile byte Stingray_ACK_ScreenLine3Buf[STATUS_SIZE];		//line4
+volatile byte Stingray_ACK_ScreenCursorPosBuf[4];
+volatile byte Stingray_ACK_ScreenStateBuf[2];				//20100129
+
+	
+volatile byte Stingray_Status;
+volatile byte Stingray_Key_Value;
+volatile byte Stingray_Key_OverTime;
+volatile byte Stingray_Screen0x82Count;
+volatile byte Stingray_StateData[4];
+
+volatile byte Stingray_StationInfo;
+volatile byte Stingray_StationPresetNumber;
+//volatile byte uStingray.sSName.IRadioStationName[30][STATIONNAME_MAX_SIZE];
+//volatile byte uStingray.sSName.FMStationName[30][STATIONNAME_MAX_SIZE];
+//volatile byte uStingray.sSName.DABStationName[30][STATIONNAME_MAX_SIZE];
+
+union uSName  uStingray;					//20100128
+union uDSName uDispStingray;				//20100209
+	
+
+volatile word STRead_count;
+volatile byte STRead_mode;
+volatile byte UARTRead_buf[530];		//20110907 (500=>530)
+volatile word UARTRead_count;
+volatile word UARTRead_count50;			//20101213
+volatile byte STRead_JoinBuf[270];		//20110907 (500=>270)
+volatile word STRead_JoinCount;
+
+volatile byte_flags dab_preset_flag;
+#define DABfl_Memory					dab_preset_flag.byte_bit.bit0
+#define f_DAB_preset_500msec			dab_preset_flag.byte_bit.bit1
+
+volatile byte mode_preset;
+volatile byte dab_preset;
+volatile byte dab_preset_new;
+volatile byte dab_CurrentPreset;
+volatile word count_DisplayDAB_Preset;
+volatile word timer_500msec;
+volatile byte DispBuf_Preset[20];
+
+volatile byte mode_DisplayDAB;
+
+volatile byte count_memory_state;
+volatile byte count_preset_state;
+volatile word count_mode_reset;
+volatile word count_state_Tx;
+volatile byte presetKey_imsi;
+
+volatile byte count_delayVFD;
+
+volatile word count_factoryDefault;
+volatile byte mode_stingrayUpgradingFirmware;		//20100426
+volatile byte RotelOpaqueData[330];					//20110316

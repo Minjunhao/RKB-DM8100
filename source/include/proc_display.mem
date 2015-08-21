@@ -1,0 +1,53 @@
+//
+union uTDISP TDISP_BUFF;
+union uTDISP TDISP_TEMP_BUFF;
+union uTDISP TTX_DISP_BUFF;			
+union uTDISP FTX_DISP_BUFF;			
+
+#ifdef STINGRAY_UTF8_4321
+union uUTF8DISP TDISP_BUFF_UTF8;
+union uUTF8DISP TDISP_TEMP_BUFF_UTF8;
+union uUTF8DISP TTX_DISP_BUFF_UTF8;			
+union uUTF8DISP FTX_DISP_BUFF_UTF8;			
+#endif
+
+
+
+unsigned char mode_DispBlockC;
+
+unsigned char count_PowerOn1Ing;
+
+
+
+unsigned char f_tx_disp_buff;
+
+unsigned char timer_Scroll;
+unsigned char counter_Scroll;
+
+unsigned char mode_setup;
+unsigned char mode_setupCursor;
+
+unsigned char mode_CursorFactory;
+unsigned char mode_CursorFactory1;
+unsigned char mode_LineFactory;
+
+unsigned char mode_CursorCustomCode;
+unsigned char mode_AudioCustomCode;
+unsigned char mode_CDCustomCode;
+unsigned char mode_AntennaAB;
+
+unsigned char mode_CursorAllPresetList;		//20100128
+unsigned char mode_AllPresetList;			//20100128
+unsigned char mode_SortMaxPresetList;		//20100210
+unsigned char mode_CursoriRadioPresetList;
+unsigned char mode_iRadioPresetList;
+unsigned char mode_CursorFMPresetList;
+unsigned char mode_FMPresetList;
+unsigned char mode_CursorDABPresetList;
+unsigned char mode_DABPresetList;
+
+unsigned char count_initScrollDelay;
+unsigned char count_ScrollDelay;
+unsigned char p_ScrollCharacter;
+
+unsigned char b_StreamDisplayDelay;

@@ -1,0 +1,193 @@
+extern char blank;    
+
+
+extern volatile byte mode_func;
+extern volatile byte mode_Power;
+extern volatile byte mode_PowerStatus;
+
+extern unsigned char mode_func_bk;
+
+
+
+extern volatile byte timer_MuteOff;
+extern volatile byte timer_DirectMuteOff[4];
+extern volatile byte_flags mute_flag;
+#define f_MainMute		mute_flag.byte_bit.bit0
+//20140224
+extern volatile byte DirectMuteOn[4];
+extern volatile byte DirectMuteOff[4];
+
+
+// fl onoff
+extern volatile byte mode_floff;
+extern volatile byte timer_floff;
+
+// key
+extern volatile byte b_key_status;
+extern volatile int count_rmcLongKey;		//20090713
+extern volatile int count_rmcRepeatKey;		//20090722
+extern volatile int count_rsLongKey;		//20100317
+
+extern volatile byte key_Value;	
+extern volatile byte key_Attribute;	// long,normal
+extern volatile byte key_Kind;		// front,rmc,rmc1,rs232
+extern volatile byte key_FrontMode;	// ready,longstart,long
+extern volatile byte key_FrontBackup;	
+extern volatile byte key_RmcEBackup;
+extern volatile byte key_Rmc1Backup;
+extern volatile byte key_Rmc2Backup;
+extern volatile byte key_Rmc3Backup;
+extern volatile byte timer_KeyLong;
+extern volatile byte b_displaykey_count;	// chd : FL 3sec longkey
+extern volatile byte b_floff_mode;	// chd : osd menu 3sec longkey mode=>off
+
+extern volatile byte key_Type;			//20030822
+extern volatile byte stringText[30];	//20100129
+
+// rs232 key buffer
+extern volatile byte rs232_key_buffer[38];	//20130520
+extern volatile byte rs232_key_mode;
+extern volatile byte rs232_key_count;
+
+// rs232 pressed ->(5sec)-> released
+extern volatile byte Rs232_pressed_key;
+extern volatile byte Rs232_pressed_count;
+// ASCii pressed ->(3sec)-> released
+extern volatile byte ASCii_pressed_key;
+extern volatile byte ASCii_pressed_count;
+
+
+extern volatile byte blockc_DisplayTimer;	//
+extern unsigned char mode_DisplayUpdate;			//20131212
+
+/* io_sub */
+
+
+extern volatile byte trigger_status;
+extern volatile word W_T12V_OLD;
+extern volatile word_flags W_T12V_DATA;
+#define	f_trigger_in	W_T12V_DATA.word_bit.bit12
+
+extern unsigned char mute;
+extern unsigned char PowerDownCounter;
+
+extern volatile byte_flags SystemStatus;
+#define f_power_on		SystemStatus.byte_bit.bit0
+#define f_display_on	SystemStatus.byte_bit.bit1
+#define f_initialize	SystemStatus.byte_bit.bit2
+#define f_amp_protect	SystemStatus.byte_bit.bit3
+#define f_install_edid	SystemStatus.byte_bit.bit4
+#define f_500msec_on	SystemStatus.byte_bit.bit5
+#define f_BlinkOn		SystemStatus.byte_bit.bit6
+
+extern volatile byte mute_mode;
+extern volatile byte b1_CommTimer_250msec;
+
+
+extern unsigned char mode_Under1Watt;				//20091028
+extern unsigned char VFD_scanStop;					//20091224
+
+
+extern unsigned char mode_amp_protect;	//20120626
+extern unsigned char Amp_protectionTime;	//20120917
+
+extern volatile byte RotelOpaqueData[200];      //20120807
+extern volatile byte Stingray_Startup_mode;     //20120807
+extern volatile byte count_delayVFD;
+extern volatile byte count_delayScanVFD;       //20121011
+//20120807
+extern unsigned char T125msec_count;
+
+#ifdef UART4_ENABLE	
+extern volatile byte UART4_TEMP_BUFF[40];
+extern volatile byte key_Type4;
+extern volatile byte key_Value4;	
+extern volatile byte key_Kind4;
+extern volatile byte rs2324_key_buffer[60];
+extern volatile byte rs2324_key_mode;
+extern volatile byte rs2324_key_count;
+// rs232 pressed ->(5sec)-> released
+extern volatile byte Rs2324_pressed_key;
+extern volatile byte Rs2324_pressed_count;
+#endif
+
+#ifdef UART5_ENABLE	
+extern volatile byte UART5_TEMP_BUFF[40];
+extern volatile byte key_Type5;
+extern volatile byte key_Value5;	
+extern volatile byte key_Kind5;
+extern volatile byte rs2325_key_buffer[60];
+extern volatile byte rs2325_key_mode;
+extern volatile byte rs2325_key_count;
+// rs232 pressed ->(5sec)-> released
+extern volatile byte Rs2325_pressed_key;
+extern volatile byte Rs2325_pressed_count;
+#endif
+
+//20120918
+extern unsigned char power_txMode;
+extern unsigned char RKB_ModelID;
+extern unsigned char RKB_SubID;
+extern unsigned int count_powerOffDelay;				//20131219
+extern volatile word count_delay_AMPProtectionCheck;            //20121012
+
+//RKB
+extern unsigned char FAN_HS_mode;			//20140521
+extern unsigned char FAN_LS_mode;			//20140521
+
+extern unsigned char Led_mode;
+extern unsigned char Led_count_timer;
+extern unsigned char Led_count_times;
+extern unsigned char Led_current_status;	//20140225
+//
+extern unsigned char fan_ls_on_temp;		//20140521
+extern unsigned char fan_ls_off_temp;		//20140521
+extern unsigned char fan_hs_on_temp;		//20140521
+extern unsigned char fan_hs_off_temp;		//20140521
+extern unsigned char shutdown_temp;
+extern unsigned char SMPS_shutdown_temp;
+//20140311
+extern unsigned char smps_fan_on_temp;
+extern unsigned char smps_fan_off_temp;
+//20131129 : 
+extern unsigned char TemperatureADC_Mode;
+extern unsigned char amp_protextion_skip;
+//20131204 : 
+extern unsigned char power_on_after_2sec_20msec;
+extern unsigned char power_on_2sec_vol_tx_enable;
+//20131212
+extern unsigned char RS232_TxSkip;
+//20131218
+extern unsigned char time_delay_volume_Tx;
+//20140212
+extern unsigned char amp_on_off[4];
+extern unsigned char volume_Lch[4];
+extern unsigned char volume_Rch[4];
+extern unsigned char balance[4];
+extern unsigned char ch_muteOn[4];
+extern unsigned char ch_muteOn_volValue[4];
+extern unsigned char front_trimKnob_enable;
+//20140218
+extern unsigned char cmd_ampType;
+//20140224
+extern unsigned char eepromAddr;
+//20140225
+extern volatile byte LED_Dimmer_value;
+extern unsigned char LED_dimming_counter;
+//20140408
+extern unsigned char mode_AHB_prescaler;
+//20140515
+extern unsigned char optical_power_mode;
+extern unsigned char opticalpower_bk;
+extern unsigned char count_opticalPower;
+//20140523
+extern unsigned char signalSensingAMPStatus;
+extern unsigned int signal_sensing_counter;
+//20140812
+extern unsigned char singalOn_noise_counter;
+extern unsigned int singalOn_low_counter;
+extern unsigned int signalOn_500m_timer;
+//20140730
+extern unsigned char current_SignalSensingMode;
+//20150302
+extern unsigned char input_selMode[4];

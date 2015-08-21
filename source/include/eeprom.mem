@@ -1,0 +1,2 @@
+volatile unsigned char buffer_eeprom[256];
+volatile byte b_work_dummy;

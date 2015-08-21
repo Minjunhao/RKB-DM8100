@@ -1,0 +1,86 @@
+/*	UART1 PC:RS232 	bps:115,200
+	UART2    		bps:115,200
+	UART3 
+	UART4  			bps:57,600
+	UART5
+------------------------------------------------------------------------------*/
+#define RX_MAX_SIZE 	1000
+#define TX_MAX_SIZE 	1000
+#define RX2_MAX_SIZE 	1000
+#define TX2_MAX_SIZE 	1000
+#define RX3_MAX_SIZE 	1000
+#define TX3_MAX_SIZE 	1000
+#define RX4_MAX_SIZE 	1000
+#define TX4_MAX_SIZE 	1000
+#define RX5_MAX_SIZE 	1000
+#define TX5_MAX_SIZE 	1000
+
+byte rx_buf[RX_MAX_SIZE];		//RS232
+byte tx_buf[TX_MAX_SIZE];
+
+#ifdef UART2_ENABLE	
+byte rx2_buf[RX2_MAX_SIZE];		// 
+byte tx2_buf[TX2_MAX_SIZE];
+#endif
+#ifdef UART3_ENABLE	
+byte rx3_buf[RX3_MAX_SIZE];		//
+byte tx3_buf[TX3_MAX_SIZE];
+#endif
+#ifdef UART4_ENABLE	
+byte rx4_buf[RX4_MAX_SIZE];		//
+byte tx4_buf[TX4_MAX_SIZE];
+#endif
+#ifdef UART5_ENABLE	
+byte rx5_buf[RX5_MAX_SIZE];		//
+byte tx5_buf[TX5_MAX_SIZE];
+#endif
+
+volatile word rs232_Rx_Head;
+volatile word rs232_Rx_Tail;
+volatile word rs232_Tx_Head;
+volatile word rs232_Tx_Tail;
+volatile byte tx_existed;
+#ifdef UART2_ENABLE	
+volatile word rs232_Rx2_Head;
+volatile word rs232_Rx2_Tail;
+volatile word rs232_Tx2_Head;
+volatile word rs232_Tx2_Tail;
+volatile byte tx2_existed;
+#endif
+#ifdef UART3_ENABLE	
+volatile word rs232_Rx3_Head;
+volatile word rs232_Rx3_Tail;
+volatile word rs232_Tx3_Head;
+volatile word rs232_Tx3_Tail;
+volatile byte tx3_existed;
+#endif
+#ifdef UART4_ENABLE	
+volatile word rs232_Rx4_Head;
+volatile word rs232_Rx4_Tail;
+volatile word rs232_Tx4_Head;
+volatile word rs232_Tx4_Tail;
+volatile byte tx4_existed;
+#endif
+#ifdef UART5_ENABLE	
+volatile word rs232_Rx5_Head;
+volatile word rs232_Rx5_Tail;
+volatile word rs232_Tx5_Head;
+volatile word rs232_Tx5_Tail;
+volatile byte tx5_existed;
+#endif
+//
+#ifdef IC_DEBUG	
+volatile unsigned char ic_comm_ok;
+volatile unsigned char ic_comm_use;
+volatile unsigned char ic_comm_buf[32];
+volatile unsigned char ic_comm_index;
+volatile unsigned char ic_start_frame;
+volatile unsigned char ic_comm_state;
+#endif
+//
+
+static byte cmd_count;
+static byte cmd_mode;
+static byte rx_checksum;
+
+

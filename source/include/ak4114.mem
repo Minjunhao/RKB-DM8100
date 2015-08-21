@@ -1,0 +1,40 @@
+volatile byte a_Work[16];
+
+///////////////////////////////////////////////////////////
+//AK4117 Block A/B/C/D
+///////////////////////////////////////////////////////////
+volatile byte b_4114Input[4];
+
+volatile byte b_ModeStatus[4];
+//
+//volatile byte_flags b_ModeStatus[4];
+//#define f_PllCheckOn            b_ModeStatus[typ].byte_bit.bit5
+//#define f_InputChg              b_ModeStatus[typ].byte_bit.bit1
+//
+//
+volatile byte b_StreamKind[4];
+volatile byte b_StreamFreq[4];
+volatile byte b_StreamFreq_bk[4];          //20131127
+volatile byte b_NorStreamFreq[4];
+
+volatile byte b_AutoStreamKind[4];
+
+volatile byte b_PllCheckTime[4];
+volatile byte b_PllStatus[4];
+volatile byte b_PllStatus_bk[4];			//20130521
+
+volatile byte b_4114Status[4];
+volatile byte b_4114Mode[4];
+unsigned char b_CurrDIRMode[4];		//jyj_pop
+
+unsigned char b_StreamCheckDelay_A;			//20130521
+unsigned char b_StreamCheckDelay_B;			//20130521
+unsigned char b_StreamCheckDelay_C;			//20130521
+unsigned char b_StreamCheckDelay_D;			//20130521
+//20131202
+unsigned char b_FreqTxDelay_A;				
+unsigned char b_FreqTxDelay_B;
+unsigned char b_FreqTxDelay_C;
+unsigned char b_FreqTxDelay_D;
+//20140225
+volatile byte b_INT0_bk[4];

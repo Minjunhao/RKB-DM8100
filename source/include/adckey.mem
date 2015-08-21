@@ -1,0 +1,58 @@
+typedef	struct Key_t{
+	byte KeyScan[SCANNOS];
+	byte KeyImsi[SCANNOS];
+	byte KeyBuf[SCANNOS];
+	byte KeyData[SCANNOS];
+	byte KeyHoldTime[SCANNOS];
+	int  KeyRepeatTime[SCANNOS];
+	byte KeyMulti;
+	byte KeyMode[SCANNOS];
+	byte KeyOk[SCANNOS];
+	byte_flags KeyStatus1;
+	byte_flags KeyStatus2;
+	byte_flags KeyStatus3;
+	byte_flags KeyStatus4;
+	byte_flags KeyStatus5;
+	byte_flags KeyStatus6;
+} Key_t;
+Key_t key;
+
+#define f_KeyRefresh1	key.KeyStatus1.byte_bit.bit1
+#define f_KeyRepeatOk1	key.KeyStatus1.byte_bit.bit2
+#define f_KeyRepeatly1	key.KeyStatus1.byte_bit.bit3
+#define f_KeyReleased1	key.KeyStatus1.byte_bit.bit4
+//
+#define f_KeyRefresh2	key.KeyStatus2.byte_bit.bit1
+#define f_KeyRepeatOk2	key.KeyStatus2.byte_bit.bit2
+#define f_KeyRepeatly2	key.KeyStatus2.byte_bit.bit3
+#define f_KeyReleased2	key.KeyStatus2.byte_bit.bit4
+//
+#define f_KeyRefresh3	key.KeyStatus3.byte_bit.bit1
+#define f_KeyRepeatOk3	key.KeyStatus3.byte_bit.bit2
+#define f_KeyRepeatly3	key.KeyStatus3.byte_bit.bit3
+#define f_KeyReleased3	key.KeyStatus3.byte_bit.bit4
+//
+#define f_KeyRefresh4	key.KeyStatus4.byte_bit.bit1
+#define f_KeyRepeatOk4	key.KeyStatus4.byte_bit.bit2
+#define f_KeyRepeatly4	key.KeyStatus4.byte_bit.bit3
+#define f_KeyReleased4	key.KeyStatus4.byte_bit.bit4
+//
+#define f_KeyRefresh5	key.KeyStatus5.byte_bit.bit1
+#define f_KeyRepeatOk5	key.KeyStatus5.byte_bit.bit2
+#define f_KeyRepeatly5	key.KeyStatus5.byte_bit.bit3
+#define f_KeyReleased5	key.KeyStatus5.byte_bit.bit4
+//
+#define f_KeyRefresh6	key.KeyStatus6.byte_bit.bit1
+#define f_KeyRepeatOk6	key.KeyStatus6.byte_bit.bit2
+#define f_KeyRepeatly6	key.KeyStatus6.byte_bit.bit3
+#define f_KeyReleased6	key.KeyStatus6.byte_bit.bit4
+//
+
+vu16 ADC_Val[4];
+vu16 current_ADC_Val[4];
+
+unsigned char UpDownRepeatCount;
+
+unsigned char key_target[8];
+unsigned char current_key[8];
+

@@ -1,0 +1,193 @@
+char blank;
+
+
+volatile byte mode_func;
+volatile byte mode_Power;
+volatile byte mode_PowerStatus;
+
+unsigned char mode_func_bk;
+
+
+
+volatile byte timer_MuteOff;
+volatile byte timer_DirectMuteOff[4];
+volatile byte_flags mute_flag;
+#define f_MainMute		mute_flag.byte_bit.bit0
+//20140224
+volatile byte DirectMuteOn[4];
+volatile byte DirectMuteOff[4];
+
+
+// fl onoff
+volatile byte mode_floff;
+volatile byte timer_floff;
+
+// key
+volatile byte b_key_status;
+volatile int count_rmcLongKey;		//20090713
+volatile int count_rmcRepeatKey;	//20090722
+volatile int count_rsLongKey;		//20100317
+
+volatile byte key_Value;	
+volatile byte key_Attribute;	// long,normal
+volatile byte key_Kind;			// front,rmc,rmc1,rs232
+volatile byte key_FrontMode;	// ready,longstart,long
+volatile byte key_FrontBackup;	
+volatile byte key_RmcEBackup;
+volatile byte key_Rmc1Backup;
+volatile byte key_Rmc2Backup;
+volatile byte key_Rmc3Backup;
+volatile byte timer_KeyLong;
+volatile byte b_displaykey_count;	// chd : FL 3sec longkey
+volatile byte b_floff_mode;		// chd : osd menu 3sec longkey mode=>off
+
+volatile byte key_Type;			//20030822
+volatile byte stringText[30];	//20100129
+
+// rs232 key buffer
+volatile byte rs232_key_buffer[38];	//20130520
+volatile byte rs232_key_mode;
+volatile byte rs232_key_count;
+
+// rs232 pressed ->(5sec)-> released
+volatile byte Rs232_pressed_key;
+volatile byte Rs232_pressed_count;
+// ASCii pressed ->(3sec)-> released
+volatile byte ASCii_pressed_key;
+volatile byte ASCii_pressed_count;
+
+
+volatile byte blockc_DisplayTimer;	//
+unsigned char mode_DisplayUpdate;			//20131212
+
+/* io_sub */
+
+
+volatile byte trigger_status;
+volatile word W_T12V_OLD;
+volatile word_flags W_T12V_DATA;
+#define	f_trigger_in	W_T12V_DATA.word_bit.bit12
+
+unsigned char mute;
+unsigned char PowerDownCounter;
+
+volatile byte_flags SystemStatus;
+#define f_power_on		SystemStatus.byte_bit.bit0
+#define f_display_on	SystemStatus.byte_bit.bit1
+#define f_initialize	SystemStatus.byte_bit.bit2
+#define f_amp_protect   SystemStatus.byte_bit.bit3
+#define f_install_edid	SystemStatus.byte_bit.bit4
+#define f_500msec_on	SystemStatus.byte_bit.bit5
+#define f_BlinkOn		SystemStatus.byte_bit.bit6
+
+volatile byte mute_mode;
+volatile byte b1_CommTimer_250msec;
+
+
+unsigned char mode_Under1Watt;				//20091028
+unsigned char VFD_scanStop;					//20091224
+
+
+unsigned char mode_amp_protect;	//20120626
+unsigned char Amp_protectionTime;	//20120917
+
+volatile byte RotelOpaqueData[200];     //20120807
+volatile byte Stingray_Startup_mode;     //20120807
+volatile byte count_delayVFD;
+volatile byte count_delayScanVFD;       //20121011
+//20120807
+unsigned char T125msec_count;
+
+#ifdef UART4_ENABLE	
+volatile byte UART4_TEMP_BUFF[40];
+volatile byte key_Type4;
+volatile byte key_Value4;	
+volatile byte key_Kind4;
+volatile byte rs2324_key_buffer[60];
+volatile byte rs2324_key_mode;
+volatile byte rs2324_key_count;
+// rs232 pressed ->(5sec)-> released
+volatile byte Rs2324_pressed_key;
+volatile byte Rs2324_pressed_count;
+#endif
+
+#ifdef UART5_ENABLE	
+volatile byte UART5_TEMP_BUFF[40];
+volatile byte key_Type5;
+volatile byte key_Value5;	
+volatile byte key_Kind5;
+volatile byte rs2325_key_buffer[60];
+volatile byte rs2325_key_mode;
+volatile byte rs2325_key_count;
+// rs232 pressed ->(5sec)-> released
+volatile byte Rs2325_pressed_key;
+volatile byte Rs2325_pressed_count;
+#endif
+
+//20120918
+unsigned char power_txMode;
+unsigned char RKB_ModelID;
+unsigned char RKB_SubID;
+unsigned int count_powerOffDelay;				//20131219
+volatile word count_delay_AMPProtectionCheck;           //20121012
+
+//RKB
+unsigned char FAN_HS_mode;			//20140521
+unsigned char FAN_LS_mode;			//20140521
+
+unsigned char Led_mode;
+unsigned char Led_count_timer;
+unsigned char Led_count_times;
+unsigned char Led_current_status;	//20140225
+//
+unsigned char fan_ls_on_temp;		//20140521
+unsigned char fan_ls_off_temp;		//20140521
+unsigned char fan_hs_on_temp;		//20140521
+unsigned char fan_hs_off_temp;		//20140521
+unsigned char shutdown_temp;
+unsigned char SMPS_shutdown_temp;
+//20140311
+unsigned char smps_fan_on_temp;
+unsigned char smps_fan_off_temp;
+//20131129 : 
+unsigned char TemperatureADC_Mode;
+unsigned char amp_protextion_skip;
+//20131204 : 
+unsigned char power_on_after_2sec_20msec;
+unsigned char power_on_2sec_vol_tx_enable;
+//20131212
+unsigned char RS232_TxSkip;
+//20131218
+unsigned char time_delay_volume_Tx;
+//20140212
+unsigned char amp_on_off[4];
+unsigned char volume_Lch[4];
+unsigned char volume_Rch[4];
+unsigned char balance[4];
+unsigned char ch_muteOn[4];
+unsigned char ch_muteOn_volValue[4];
+unsigned char front_trimKnob_enable;
+//20140218
+unsigned char cmd_ampType;
+//20140224
+unsigned char eepromAddr;
+//20140225
+volatile byte LED_Dimmer_value;
+unsigned char LED_dimming_counter;
+//20140408
+unsigned char mode_AHB_prescaler;
+//20140515
+unsigned char optical_power_mode;
+unsigned char opticalpower_bk;
+unsigned char count_opticalPower;
+//20140523
+unsigned char signalSensingAMPStatus;
+unsigned int signal_sensing_counter;
+//20140812
+unsigned char singalOn_noise_counter;
+unsigned int singalOn_low_counter;
+unsigned int signalOn_500m_timer;
+//20140730
+unsigned char current_SignalSensingMode;
+//20150302
+unsigned char input_selMode[4];

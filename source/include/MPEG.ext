@@ -1,0 +1,38 @@
+extern unsigned char grid0[20];
+extern unsigned char grid1[20];
+extern unsigned char cdp_grid[4][20];
+
+extern unsigned char MTK_System_Data[0x20];
+extern unsigned char MTK_System_Data05_m1[0x06];
+extern unsigned char MTK_System_Data06_m1;			//play type
+
+extern unsigned char MTK_System_Data09_m1;			//m1
+extern unsigned char MTK_System_Data09_m2;			//m2
+extern unsigned char MTK_System_Data09_m3;			//m3
+
+extern unsigned char MTK_System_Data0E_m1;			//m1
+
+extern unsigned char MTK_System_Data0F_m1;			//m1
+
+extern unsigned char MTK_System_Data14_m1;			//m1
+
+extern unsigned char MTK_System_Data17_m1;			//m1
+
+extern unsigned char MPEGRx_count;			
+extern unsigned char MPEGRx_mode;			
+extern unsigned char MPEGRx_data[15];			
+
+extern unsigned char tx_MPEG_buf[6];			
+
+extern unsigned char mode_repeat;			
+
+extern unsigned int count_trigger_ms;
+extern unsigned char dim_level;
+
+extern unsigned char mpeg_version[20];			
+
+extern unsigned char count_MPEG_versionDisplayTx;		//20090827
+extern unsigned char Play_TxDelayMode;					//20090828
+extern unsigned char count_Play_TxDelayMode;			//20090828
+extern unsigned char cd_powerChange;					//20090901
+extern unsigned char count_powerOffDelay;				//20090901

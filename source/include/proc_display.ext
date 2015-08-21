@@ -1,0 +1,53 @@
+//
+extern union uTDISP TDISP_BUFF;
+extern union uTDISP TDISP_TEMP_BUFF;
+extern union uTDISP TTX_DISP_BUFF;
+extern union uTDISP FTX_DISP_BUFF;
+
+#ifdef STINGRAY_UTF8_4321
+extern union uUTF8DISP TDISP_BUFF_UTF8;
+extern union uUTF8DISP TDISP_TEMP_BUFF_UTF8;
+extern union uUTF8DISP TTX_DISP_BUFF_UTF8;			
+extern union uUTF8DISP FTX_DISP_BUFF_UTF8;			
+#endif
+
+
+
+extern unsigned char mode_DispBlockC;
+
+extern unsigned char count_PowerOn1Ing;
+
+
+
+extern unsigned char f_tx_disp_buff;	//disp buffer compare후 틀리면 1
+
+extern unsigned char timer_Scroll;
+extern unsigned char counter_Scroll;
+
+extern unsigned char mode_setup;
+extern unsigned char mode_setupCursor;
+
+extern unsigned char mode_CursorFactory;
+extern unsigned char mode_CursorFactory1;
+extern unsigned char mode_LineFactory;
+
+extern unsigned char mode_CursorCustomCode;
+extern unsigned char mode_AudioCustomCode;
+extern unsigned char mode_CDCustomCode;
+extern unsigned char mode_AntennaAB;
+
+extern unsigned char mode_CursorAllPresetList;		//20100128
+extern unsigned char mode_AllPresetList;			//20100128
+extern unsigned char mode_SortMaxPresetList;		//20100210
+extern unsigned char mode_CursoriRadioPresetList;
+extern unsigned char mode_iRadioPresetList;
+extern unsigned char mode_CursorFMPresetList;
+extern unsigned char mode_FMPresetList;
+extern unsigned char mode_CursorDABPresetList;
+extern unsigned char mode_DABPresetList;
+
+extern unsigned char count_initScrollDelay;
+extern unsigned char count_ScrollDelay;
+extern unsigned char p_ScrollCharacter;
+
+extern unsigned char b_StreamDisplayDelay;

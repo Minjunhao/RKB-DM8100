@@ -1,0 +1,117 @@
+/*********** remocon *******************/
+// remocon3
+unsigned char b1_rmc3_mode;
+unsigned char b1_rmc3_flamecount;
+unsigned char b1_rmc3_bitcount;
+unsigned char b1_rmc3_Attrib;
+union wWORD RMC3_DATA;
+unsigned int rmc3_custom;
+unsigned char b1_rmc3_key;
+unsigned char b1_rmc3_longkeycount;
+unsigned char b1_rmc3_repeatcount;
+
+volatile byte_flags rmc3_flags;
+#define f1_rmc3_repeat		rmc3_flags.byte_bit.bit7
+#define f1_rmc3_key			rmc3_flags.byte_bit.bit6
+#define f1_rmc3_longkey		rmc3_flags.byte_bit.bit5
+#define f1_rmc3_keyoff		rmc3_flags.byte_bit.bit4
+#define f1_rmc3_keypress	rmc3_flags.byte_bit.bit3
+#define f1_rmc3_repeatkey	rmc3_flags.byte_bit.bit2	
+
+unsigned char b1_rmc3_rmd2;
+unsigned char b1_rmd3_copy;
+unsigned char b1_rmd3_mode;
+unsigned char b1_rmd3;
+
+// remocon2
+unsigned char b1_rmc2_mode;
+unsigned char b1_rmc2_flamecount;
+unsigned char b1_rmc2_bitcount;
+unsigned char b1_rmc2_Attrib;
+union wWORD RMC2_DATA;
+unsigned int rmc2_custom;
+unsigned char b1_rmc2_key;
+unsigned char b1_rmc2_longkeycount;
+unsigned char b1_rmc2_repeatcount;
+
+volatile byte_flags rmc2_flags;
+#define f1_rmc2_repeat		rmc2_flags.byte_bit.bit7
+#define f1_rmc2_key			rmc2_flags.byte_bit.bit6
+#define f1_rmc2_longkey		rmc2_flags.byte_bit.bit5
+#define f1_rmc2_keyoff		rmc2_flags.byte_bit.bit4
+#define f1_rmc2_keypress	rmc2_flags.byte_bit.bit3
+#define f1_rmc2_repeatkey	rmc2_flags.byte_bit.bit2	
+
+unsigned char b1_rmc2_rmd2;
+unsigned char b1_rmd2_copy;
+unsigned char b1_rmd2_mode;
+unsigned char b1_rmd2;
+
+
+// remocon 1
+unsigned char b1_rmc1_mode;
+unsigned char b1_rmc1_flamecount;
+unsigned char b1_rmc1_bitcount;
+unsigned char b1_rmc1_Attrib;
+union wWORD RMC1_DATA;
+unsigned int rmc1_custom;
+unsigned int b2_rmc1_custom;
+unsigned char b1_rmc1_key;
+unsigned char b1_rmc1_longkeycount;
+unsigned char b1_rmc1_repeatcount;
+
+volatile byte_flags rmc1_flags;
+#define f1_rmc1_repeat		rmc1_flags.byte_bit.bit7
+#define f1_rmc1_key			rmc1_flags.byte_bit.bit6
+#define f1_rmc1_longkey		rmc1_flags.byte_bit.bit5
+#define f1_rmc1_keyoff		rmc1_flags.byte_bit.bit4
+#define f1_rmc1_keypress	rmc1_flags.byte_bit.bit3
+#define f1_rmc1_repeatkey	rmc1_flags.byte_bit.bit2	
+
+unsigned char b1_rmc1_rmd2;
+unsigned char b1_rmd1_copy;
+unsigned char b1_rmd1_mode;
+unsigned char b1_rmd1;
+
+// remoconE
+unsigned char b1_rmcE_mode;
+unsigned char b1_rmcE_flamecount;
+unsigned char b1_rmcE_bitcount;
+unsigned char b1_rmcE_Attrib;
+union wWORD RMCE_DATA;
+unsigned int rmcE_custom;
+unsigned int b2_rmcE_custom;
+unsigned char b1_rmcE_key;
+unsigned char b1_rmcE_longkeycount;
+unsigned char b1_rmcE_repeatcount;
+
+volatile byte_flags rmcE_flags;
+#define f1_rmcE_repeat		rmcE_flags.byte_bit.bit7
+#define f1_rmcE_key			rmcE_flags.byte_bit.bit6
+#define f1_rmcE_longkey		rmcE_flags.byte_bit.bit5
+#define f1_rmcE_keyoff		rmcE_flags.byte_bit.bit4
+#define f1_rmcE_keypress	rmcE_flags.byte_bit.bit3
+#define f1_rmcE_repeatkey	rmcE_flags.byte_bit.bit2	
+
+unsigned char b1_rmcE_rmd2;
+unsigned char b1_rmdE_copy;
+unsigned char b1_rmdE_mode;
+unsigned char b1_rmdE;
+
+
+// status
+unsigned char b1_rmcE_status;
+unsigned char b1_rmc1_status;
+unsigned char b1_rmc2_status;
+unsigned char b1_rmc3_status;
+unsigned int b1_rmcE_masking;
+unsigned int b1_rmc1_masking;
+unsigned int b1_rmc2_masking;
+unsigned int b1_rmc3_masking;
+unsigned char rmcE_status;
+unsigned char rmc1_status;
+unsigned char rmc2_status;
+unsigned char rmc3_status;
+
+/* */
+

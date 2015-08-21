@@ -1,0 +1,98 @@
+
+// remocon 3
+extern unsigned char b1_rmc3_mode;
+extern unsigned char b1_rmc3_flamecount;
+extern unsigned char b1_rmc3_bitcount;
+extern unsigned char b1_rmc3_Attrib;
+extern union wWORD RMC3_DATA;
+extern unsigned int rmc3_custom;
+extern unsigned char b1_rmc3_key;
+extern unsigned char b1_rmc3_longkeycount;
+extern unsigned char b1_rmc3_repeatcount;
+extern unsigned char b1_rmd3_copy;
+extern unsigned char b1_rmd3_mode;
+extern unsigned char b1_rmd3;
+
+extern volatile byte_flags rmc3_flags;
+#define f1_rmcE_repeat		rmcE_flags.byte_bit.bit7
+#define f1_rmcE_key			rmcE_flags.byte_bit.bit6
+#define f1_rmcE_longkey		rmcE_flags.byte_bit.bit5
+#define f1_rmcE_keyoff		rmcE_flags.byte_bit.bit4
+#define f1_rmcE_keypress	rmcE_flags.byte_bit.bit3
+#define f1_rmcE_repeatkey	rmcE_flags.byte_bit.bit2	
+
+
+
+// remocon 2
+extern unsigned char b1_rmc2_mode;
+extern unsigned char b1_rmc2_flamecount;
+extern unsigned char b1_rmc2_bitcount;
+extern unsigned char b1_rmc2_Attrib;
+extern union wWORD RMC2_DATA;
+extern unsigned int rmc2_custom;
+extern unsigned char b1_rmc2_key;
+extern unsigned char b1_rmc2_longkeycount;
+extern unsigned char b1_rmc2_repeatcount;
+extern unsigned char b1_rmd2_copy;
+extern unsigned char b1_rmd2_mode;
+extern unsigned char b1_rmd2;
+
+extern volatile byte_flags rmc2_flags;
+
+
+// remocon 1
+extern unsigned char b1_rmc1_mode;
+extern unsigned char b1_rmc1_flamecount;
+extern unsigned char b1_rmc1_bitcount;
+extern unsigned char b1_rmc1_Attrib;
+extern union wWORD RMC1_DATA;
+extern unsigned int rmc1_custom;
+extern unsigned int b2_rmc1_custom;
+extern unsigned char b1_rmc1_key;
+extern unsigned char b1_rmc1_longkeycount;
+extern unsigned char b1_rmc1_repeatcount;
+extern unsigned char b1_rmd1_copy;
+extern unsigned char b1_rmd1_mode;
+extern unsigned char b1_rmd1;
+
+extern volatile byte_flags rmc1_flags;
+#define f1_rmc1_repeat		rmc1_flags.byte_bit.bit7
+#define f1_rmc1_key			rmc1_flags.byte_bit.bit6
+#define f1_rmc1_longkey		rmc1_flags.byte_bit.bit5
+#define f1_rmc1_keyoff		rmc1_flags.byte_bit.bit4
+#define f1_rmc1_keypress	rmc1_flags.byte_bit.bit3
+#define f1_rmc1_repeatkey	rmc1_flags.byte_bit.bit2	
+
+// remocon E
+extern unsigned char b1_rmcE_mode;
+extern unsigned char b1_rmcE_flamecount;
+extern unsigned char b1_rmcE_bitcount;
+extern unsigned char b1_rmcE_Attrib;
+extern union wWORD RMCE_DATA;
+extern unsigned int rmcE_custom;
+extern unsigned int b2_rmcE_custom;
+extern unsigned char b1_rmcE_key;
+extern unsigned char b1_rmcE_longkeycount;
+extern unsigned char b1_rmcE_repeatcount;
+extern unsigned char b1_rmdE_copy;
+extern unsigned char b1_rmdE_mode;
+extern unsigned char b1_rmde;
+
+extern volatile byte_flags rmcE_flags;
+
+// status
+extern unsigned char b1_rmcE_status;
+extern unsigned char b1_rmc1_status;
+extern unsigned char b1_rmc2_status;
+extern unsigned char b1_rmc3_status;
+extern unsigned int b1_rmcE_masking;
+extern unsigned int b1_rmc1_masking;
+extern unsigned int b1_rmc2_masking;
+extern unsigned int b1_rmc3_masking;
+extern unsigned char rmcE_status;
+extern unsigned char rmc1_status;
+extern unsigned char rmc2_status;
+extern unsigned char rmc3_status;
+
+/*  */
+
