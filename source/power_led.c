@@ -12,7 +12,6 @@
 
 POWER_TYPE power_status;
 LED_TYPE   led_status;
-#define _MIN
 /*
    initialize the power status
 */
