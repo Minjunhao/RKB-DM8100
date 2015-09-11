@@ -1,0 +1,37 @@
+/*###ICF### Section handled by ICF editor, don't touch! ****/
+//
+//RC1590E front MCU : STM32F207ZE [ 144pin / 512KB,128KB ]	//IAR v6.3
+//
+/*-Editor annotation file-*/
+/* IcfEditorFile="$TOOLKIT_DIR$\config\ide\IcfEditor\a_v1_0.xml" */
+/*-Specials-*/
+define symbol __ICFEDIT_intvec_start__ = 0x08010000;			//64KB=Boot Area
+/*-Memory Regions-*/
+define symbol __ICFEDIT_region_ROM_start__ = 0x08010000;		//ROM-Start
+define symbol __ICFEDIT_region_ROM_end__     = 0x0807FFFF;		//512KB
+//define symbol __ICFEDIT_region_ROM_end__   = 0x080FFFFF;		//1024KB
+
+define symbol __ICFEDIT_region_RAM_start__ = 0x20000000;		//RAM-Start
+//define symbol __ICFEDIT_region_RAM_end__     = 0x20010000;	//64KB
+define symbol __ICFEDIT_region_RAM_end__   = 0x20020000;		//128KB
+/*-Sizes-*/
+define symbol __ICFEDIT_size_cstack__ = 0x800;
+define symbol __ICFEDIT_size_heap__   = 0x400;
+/**** End of ICF editor section. ###ICF###*/
+
+
+define memory mem with size = 4G;
+define region ROM_region   = mem:[from __ICFEDIT_region_ROM_start__   to __ICFEDIT_region_ROM_end__];
+define region RAM_region   = mem:[from __ICFEDIT_region_RAM_start__   to __ICFEDIT_region_RAM_end__];
+
+define block CSTACK    with alignment = 8, size = __ICFEDIT_size_cstack__   { };
+define block HEAP      with alignment = 8, size = __ICFEDIT_size_heap__     { };
+
+initialize by copy { readwrite };
+do not initialize  { section .noinit };
+
+place at address mem:__ICFEDIT_intvec_start__ { readonly section .intvec };
+
+place in ROM_region   { readonly };
+place in RAM_region   { readwrite,
+                        block CSTACK, block HEAP };

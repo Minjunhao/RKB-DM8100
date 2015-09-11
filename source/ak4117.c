@@ -20,6 +20,8 @@
 #include "proc_function.h"
 #include "ak4117.h"
 #include "adckey.h"
+
+#define BIT_TEST(data,i)   (data&0x80>>i)? (1):(0)
 /*
    MSB
    addr: C1 C0 R/W A4 A3 A2 A1 A0
@@ -31,12 +33,14 @@
 /*
   add pulse time 
 */
+void s_Ak4114_Write_Byte(unsigned char t_data);
 void ak4117_delay(u32 delay_count)
 {
    /*
    *instruction cycle: 1=0.83ns
    *9 instruction cycle = 9*0.83ns = 7.47ns
    */
+   //delay_count=delay_count*10;
    while(--delay_count){}           //instruction cycle: 1=0.83ns
 }
 /*
@@ -102,15 +106,20 @@ void ak4117_spi_start(u8 chip_sel)
 /*
      ak4117 write one byte to ak4117
 */
+u8 data;
+#define BIT_TEST(data,i)   (data&0x80>>i)? (1):(0)
 void ak4117_write_byte(u8 byte)
 {
    //ak4117_cs()
+   #ifdef _TEST 
+   s_Ak4114_Write_Byte(byte);
+   #else
    u8 i=0;
-
+   data=byte;
    for(i=0;i<8;i++)
    	{
       ak4117_clk_ctrl(AK4117_BIT_LOW);
-	  if(AK4117_BIT_HIGH == (byte &(0x80>>i)))
+	  if(AK4117_BIT_HIGH == (BIT_TEST(byte,i)))
 	  	{
           ak4117_di_ctrl(AK4117_BIT_HIGH);
 	    }
@@ -123,7 +132,39 @@ void ak4117_write_byte(u8 byte)
 	  ak4117_delay(20);
     }
    ak4117_clk_ctrl(AK4117_BIT_LOW);
+   #endif
 }
+#ifdef _TEST
+void s_SmallWait(int s_data)
+{
+    int i,j;
+     
+	for (j=0;j<s_data;j++) {
+		//2us for STM32F207
+		for (i=0;i<9;i++) {
+			__asm(" nop" );	
+		};
+	}
+}
+void s_Ak4114_Write_Byte(unsigned char t_data)
+{
+    unsigned char i;
+
+    for(i=0;i<8;i++){
+        p_4114_clk(0);
+        s_SmallWait(10/2);	//jyj_Nec
+        if((t_data & (0x80 >> i)) == 0){
+            p_4114_do(0);
+        } else {
+            p_4114_do(1);
+        }
+        s_SmallWait(10/2);	//jyj_Nec
+         p_4114_clk(1);
+        s_SmallWait(10/2);	//jyj_Nec
+    }
+    p_4114_clk(0);
+}
+#endif
 /*
 * ak4117 read one byte from ak4117
 */
@@ -136,9 +177,10 @@ u8 ak4117_read_byte(void)
 	  ak4117_delay(20);
 	  if(AK4117_BIT_HIGH == (get_ak4117_do))
 	  	{
-	  	   val=val&0x01;
+	  	   val=val | 0x01;
 	  	}
-      val=val<<1;
+      if(i<7)
+        val=val<<1;
 	  ak4117_clk_ctrl(AK4117_BIT_LOW);	  
     }
    ak4117_clk_ctrl(AK4117_BIT_LOW);
@@ -158,11 +200,14 @@ void ak4117_register_write(u8 chip,u8 addr, u8 data)
 /*
 * ak4117 register read
 */
+u8 data_t;
 void ak4117_register_read(u8 chip, u8 addr, u8 *data)
 {
    if(chip > CHIP_D) return;   //chip:0~4
    ak4117_cs(chip,AK4117_BIT_LOW);
-   ak4117_write_byte(addr & 0xDF);   //ensure read bit is 0
+   //ak4117_write_byte(addr & 0xDF);   //ensure read bit is 0
+   ak4117_write_byte(addr & 0xDF);
+   data_t=addr&0xDF;
    *data=ak4117_read_byte();
    ak4117_cs(chip,AK4117_BIT_HIGH);
 }
@@ -383,14 +428,14 @@ void ak4117_int0_check(Channel_TYPE *chunnel)
 	  switch(chunnel->ak4117_data->pll_status)
 	  	{
 	  	  case PLL_CHECKING:
-		  	chunnel->ak4117_data->pll_status == PLL_UNLOCK;
+		  	chunnel->ak4117_data->pll_status = PLL_UNLOCK;
 			//ak4117_register_read(chip,AK4117_REV_STATUS_0,&int0_status);
 		  	break;
 		  case PLL_UNLOCK:
 		  	//ak4117_register_read(chip,AK4117_REV_STATUS_0,&int0_status);
 		  	break;
 		  case PLL_LOCK:
-		  	chunnel->ak4117_data->pll_status == PLL_CHECKING;
+		  	chunnel->ak4117_data->pll_status = PLL_CHECKING;
 			//ak4117_register_read(chip,AK4117_REV_STATUS_0,&int0_status);
 		  	break;
 	  	}
@@ -400,7 +445,7 @@ void ak4117_int0_check(Channel_TYPE *chunnel)
    else
    	{
    	int0_low:
-       chunnel->ak4117_data->pll_status == PLL_LOCK;
+       chunnel->ak4117_data->pll_status = PLL_LOCK;
     }
 }
 void ak4117_ctrl(Channel_TYPE *chunnel)

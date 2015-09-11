@@ -36,5 +36,6 @@ extern void IICSW_Read(BYTE,BYTE,BYTE *,WORD);
 extern void EEPROM_Write(WORD,BYTE *,WORD);
 extern void EEPROM_Read(WORD,BYTE *,WORD);
 extern   void Initial_I2C(void);
-extern   void Short_Delay(word Time);
+void Delay_10u(int count);
+void Delay_2u(int count);
 

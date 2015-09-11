@@ -1,7 +1,11 @@
 #ifndef _AK4117 
 #define _AK4117 
 
+#define PLL_LOCK                      0
+#define PLL_UNLOCK                    1
+#define PLL_CHECKING                  2
 #define PLL_CHECK_TIME_40MS          40
+
 #define AK4117_BIT_HIGH              1
 #define AK4117_BIT_LOW               0
 //CHIP SEL

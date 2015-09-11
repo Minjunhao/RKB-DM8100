@@ -1,4 +1,19 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "config.h"
+#include "initmcu.h"
+#include "uart.h"
+#include "main.h"
+#include "timer.h"
+#include "adckey.h"
+//#include "adckey.ext"
+#include "eeprom.h"
+#include "i2c.h"
+#include "command_key.h"
+#include "proc_function.h"
 #include "fan_ctrl.h"
+#include "power_led.h"
 
 
 
@@ -13,6 +28,57 @@ void fan_initial(void)
   fan_hs_ctrl(FAN_OFF);
   fan_ls_ctrl(FAN_OFF);
   
+}
+/*
+  fan temperature set
+*/
+void set_fan_hs_on_amp_temp(u8 temp)
+{
+    fan_status.fan_hs_on_amp_temp = temp;
+}
+u8 get_fan_hs_on_amp_temp(void)
+{
+    return fan_status.fan_hs_on_amp_temp;
+}
+void set_fan_hs_off_amp_temp(u8 temp)
+{
+    fan_status.fan_hs_off_amp_temp = temp;
+}
+u8 get_fan_hs_off_amp_temp(void)
+{
+    return fan_status.fan_hs_off_amp_temp;
+}
+void set_fan_ls_on_amp_temp(u8 temp)
+{
+    fan_status.fan_ls_on_amp_temp = temp;  
+}
+u8 get_fan_ls_on_amp_temp(void)
+{
+    return fan_status.fan_ls_on_amp_temp;
+}
+void set_fan_ls_off_amp_temp(u8 temp)
+{
+    fan_status.fan_ls_off_amp_temp=temp;
+}
+u8 get_fan_ls_off_amp_temp(void)
+{
+    return (fan_status.fan_ls_off_amp_temp);
+}
+void set_fan_on_smps_temp(u8 temp)
+{
+    fan_status.fan_on_smps_temp = temp;
+}
+u8 get_fan_on_smps_temp(void)
+{
+    return (fan_status.fan_on_smps_temp);
+}
+void set_fan_off_smps_temp(u8 temp)
+{
+    fan_status.fan_off_smps_temp = temp;
+}
+u8 get_fan_off_smps_temp(void)
+{
+    return (fan_status.fan_off_smps_temp);
 }
 /*
   fan high speed sw initial
@@ -115,6 +181,7 @@ void fan_timer_check(void)
 	   amp_temp =  get_fan_running_mode(fan_status.amp_temperature,1);    //amp  temperature test
 	   
 	   data=(smps_temp>=amp_temp)?smps_temp : amp_temp;
+
    	   switch(data)
    	   	{
            case FAN_HS_LS_OFF:

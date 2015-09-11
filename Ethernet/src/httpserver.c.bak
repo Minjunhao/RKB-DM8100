@@ -1,0 +1,883 @@
+/* Copyright (c) 2001, Swedish Institute of Computer Science.
+  * All rights reserved.
+  *
+  * Redistribution and use in source and binary forms, with or without
+  * modification, are permitted provided that the following conditions
+  * are met:
+  * 1. Redistributions of source code must retain the above copyright
+  *    notice, this list of conditions and the following disclaimer.
+  * 2. Redistributions in binary form must reproduce the above copyright
+  *    notice, this list of conditions and the following disclaimer in the
+  *    documentation and/or other materials provided with the distribution.
+  * 3. Neither the name of the Institute nor the names of its contributors
+  *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ * httpd.c
+ *
+ * Author : Adam Dunkels <adam@sics.se>
+ *
+ */
+
+#include "stm32f2xx.h"
+#include "lwip/tcp.h"
+#include "lwip/err.h"
+#include "lwip/udp.h"
+#include "lwip/igmp.h"
+#ifdef LWIP_DNS
+#include "lwip/dns.h"
+#endif
+#include "httpserver.h"
+#include "mmain.h"
+#include "netconf.h"
+#include <string.h>
+#include <stdio.h>
+#define TCP_SND_BUF_LEN  2000
+
+static struct udp_pcb *tUDPpcb;
+struct tcp_pcb *connected_pcb_upgrade;
+struct tcp_pcb *listenning_pcb;
+struct ip_addr multi_addr;
+//struct ip_addr ipaddr;
+u8_t ethernet_data_buffer[1520];
+char tcp_send_buf[TCP_CLIENT_NUM][TCP_SND_BUF_LEN];
+u8_t first_to_be_process=0;
+char tcp_send_dir=0;
+u8_t data_buffer[1000];
+u16_t ethernet_data_head;
+u16_t ethernet_data_tail;
+static u32_t tcp_state_timer;
+//TCP_STATE tcp_state=TCP_CLOSED;
+u16_t tcp_port=0;
+struct message_state
+{
+  char *file;
+  u32_t left;
+};
+CONNECTED_PCB p_tcp[TCP_CLIENT_NUM];
+static void dns_server_found(const char *name,struct ip_addr *ipaddrServer,void *arg);
+static void send_data(struct tcp_pcb *pcb, struct message_state *hs);
+void udp_server_receive_callback (void *arg, struct udp_pcb *upcb, struct pbuf *pkt_buf,
+                        struct ip_addr *addr, u16_t port);
+static err_t message_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t err);
+static void conn_err(void *arg, err_t err);
+static void close_conn(struct tcp_pcb *pcb, struct message_state *hs);
+//static void send_data(struct tcp_pcb *pcb, struct message_state *hs);
+static err_t message_poll(void *arg, struct tcp_pcb *pcb);
+static err_t client_accept(void *arg, struct tcp_pcb *pcb, err_t err);
+static err_t http_sent(void *arg, struct tcp_pcb *pcb, u16_t len);
+#ifdef _CHECK_SW_VERSION
+CHECK_SW_TYPEDEF SW_version_status = SW_GET_VERSION_STATUS;
+int  firmware_version_check(char *FW_on_server,char* current_version);
+static err_t tcp_client_connected(void *arg, struct tcp_pcb *tpcb, err_t err);
+static err_t http_client_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t err);
+static err_t http_client_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t err);
+static err_t http_client_poll(void *arg, struct tcp_pcb *pcb);
+static uint32_t Parse_Content_Length(char *data, uint32_t len);
+#endif
+/* file must be allocated by caller and will be filled in
+   by the function. */
+//static int fs_open(char *name, struct fs_file *file);
+
+
+void ip_control_init(void)
+{
+    u8_t i=0;
+	ethernet_data_head = 1520;  //for the first command
+	ethernet_data_tail = 1520;
+    first_to_be_process=0;    
+	//initial the p_tcp array
+	for(i=0;i<TCP_CLIENT_NUM;i++){
+         p_tcp[i].buffer=tcp_send_buf[i];
+         p_tcp[i].left=0;
+	     p_tcp[i].head=0;
+	     p_tcp[i].tail=0;	
+		 p_tcp[i].pcb=NULL;
+		 p_tcp[i].state=TCP_CLOSED;
+		}
+}
+// this two function is for main application do the command processing
+/**
+  * @brief  get the data from the buffer
+  * @retval 0xff means no data left for processing
+  */
+u8_t ethernet_get_data(void)
+{	
+    if(ethernet_data_head != ethernet_data_tail) {
+     	++ethernet_data_tail;
+		if(ethernet_data_tail >= 1520) ethernet_data_tail = 0;
+		return(ethernet_data_buffer[ethernet_data_tail]);
+	}else{
+		return(0xff);
+	}
+}
+/**
+  * @brief  copy data that from the TCP to the buffer
+  * @param  data: data from the TCP pcb
+  * @retval
+  */
+void ethernet_put_data(byte data)
+{
+	ethernet_data_head++;
+	if(ethernet_data_head >= 1520){
+		ethernet_data_head = 0;
+	}
+	ethernet_data_buffer[ethernet_data_head] = data;  
+}
+static void conn_err(void *arg, err_t err)
+{
+  struct message_state *hs;
+
+  hs = arg;
+  mem_free(hs);
+}
+
+/**
+  * @brief  closes tcp connection
+  * @param  pcb: pointer to a tcp_pcb struct
+  * @param  hs: pointer to a http_state struct
+  * @retval
+  */
+static void close_conn(struct tcp_pcb *pcb, struct message_state *hs)
+{
+  tcp_arg(pcb, NULL);
+  tcp_sent(pcb, NULL);
+  tcp_recv(pcb, NULL);
+  mem_free(hs);
+  tcp_close(pcb);
+}
+void close_tcp(struct tcp_pcb *pcb)
+{
+  struct message_state *hs=NULL;
+  if(pcb!=NULL)
+     close_conn(pcb,hs);
+}
+/**
+  * @brief sends data found in  member "file" of a http_state struct
+  * @param pcb: pointer to a tcp_pcb struct
+  * @param hs: pointer to a http_state struct
+  * @retval none
+  */
+static void send_data(struct tcp_pcb *pcb, struct message_state *hs)
+{
+  err_t err;
+  u16_t len;
+
+  /* We cannot send more data than space available in the send
+     buffer */
+  if (tcp_sndbuf(pcb) < hs->left)
+  {
+    len = tcp_sndbuf(pcb);
+  }
+  else
+  {
+    len = hs->left;
+  }
+  err = tcp_write(pcb, hs->file, len, 0);
+  if (err == ERR_OK)
+  {
+    hs->file += len;
+    hs->left -= len;
+  }
+}
+
+err_t enthernet_ptcp_send(CONNECTED_PCB  *p);
+/**
+  * @brief tcp poll callback function
+  * @param arg: pointer to an argument to be passed to callback function
+  * @param pcb: pointer on tcp_pcb structure
+  * @retval err_t
+  */
+static err_t message_poll(void *arg, struct tcp_pcb *pcb)
+{
+  err_t err;
+  u16_t len;
+  u8_t  i=0;
+
+  for(i=0;i<TCP_CLIENT_NUM;i++)
+  	{
+     if(pcb==p_tcp[i].pcb) 
+	 	break;
+  	}
+  if(i==TCP_CLIENT_NUM) return ERR_VAL;
+  //for (pcb = tcp_active_pcbs; NULL != pcb && i<TCP_CLIENT_NUM; pcb = pcb->next,i++)
+  	{ 
+	 if(pcb->state==ESTABLISHED && p_tcp[i].left!=0){
+      if (tcp_sndbuf(pcb) < p_tcp[i].left)
+         {
+           len = tcp_sndbuf(pcb);
+         }
+      else
+        {
+           len = p_tcp[i].left;
+        }
+	  if((p_tcp[i].tail+len)>=TCP_SND_BUF_LEN)
+	  	{
+          len=TCP_SND_BUF_LEN-p_tcp[i].tail;
+	    }  
+      if((err=tcp_write(pcb,&p_tcp[i].buffer[p_tcp[i].tail],len,TCP_WRITE_FLAG_COPY))==ERR_OK)   //TCP_WRITE_FLAG_COPY
+        {
+          //ethernet_send_start(pcb);
+          tcp_output(pcb);
+          p_tcp[i].left-=len;
+		  p_tcp[i].tail+=len;
+		  if(p_tcp[i].tail>=TCP_SND_BUF_LEN)
+            p_tcp[i].tail=0;		  
+	    }
+	 	}
+  	}
+  return ERR_OK;
+}
+
+/**
+  * @brief send data out
+  * @param msg: pointer to an argument to the msg 
+  * @param len: the length of the msg
+  * @retval void
+  */
+void ethernet_send_message(char *msg,u16_t len)
+{
+     err_t err;
+     s8_t  i=0;
+	 u32_t j=0;
+	 struct tcp_pcb *pcb;
+	 CONNECTED_PCB cpcb;
+	 
+	 //copy data to the buffer
+	 for(i=0;i<TCP_CLIENT_NUM;i++)
+	 	{
+	 	  if(p_tcp[i].left >= TCP_SND_BUF_LEN) break;                    //if buffer is full, do not copy data.
+          if(p_tcp[i].pcb != NULL && p_tcp[i].pcb->state == ESTABLISHED) //if tcp is connect, copy data to the buffer.
+          	{
+              for(j=0;j<len;j++)
+			  	{
+			  	p_tcp[i].buffer[p_tcp[i].head++]=msg[j];
+				if(p_tcp[i].head == TCP_SND_BUF_LEN){
+                  p_tcp[i].head=0;                                       //if it is end of the ring buffer, back to the start.
+				 }
+              	}
+			  p_tcp[i].left+=len;
+          	}
+	    }
+     //send data through TCP
+ 	 for(i=0;i<TCP_CLIENT_NUM;i++)
+	 	{
+	 	   if(first_to_be_process==TCP_CLIENT_NUM+1) first_to_be_process=0;  //if the postion of the processing is the end, back to the start
+		   if(p_tcp[first_to_be_process].pcb != NULL && p_tcp[first_to_be_process].pcb->state == ESTABLISHED){
+			  if (tcp_sndbuf(p_tcp[first_to_be_process].pcb) < p_tcp[first_to_be_process].left)
+                 {
+                   len = tcp_sndbuf(p_tcp[first_to_be_process].pcb);
+                 }
+              else
+                 {
+                   len = p_tcp[first_to_be_process].left;
+                 }
+			  if((p_tcp[first_to_be_process].tail+len)>=TCP_SND_BUF_LEN)
+	  	         {
+                   len=TCP_SND_BUF_LEN-p_tcp[first_to_be_process].tail;
+	             }
+              if((err=tcp_write(p_tcp[first_to_be_process].pcb,&p_tcp[first_to_be_process].buffer[p_tcp[first_to_be_process].tail],len,0))==ERR_OK)
+     	        {
+     	           //ethernet_send_start(p_tcp[first_to_be_process].pcb);
+     	           tcp_output(p_tcp[first_to_be_process].pcb);
+                   p_tcp[first_to_be_process].left-=len;
+		           p_tcp[first_to_be_process].tail+=len;
+		           if(p_tcp[first_to_be_process].tail>=TCP_SND_BUF_LEN)
+                     p_tcp[first_to_be_process].tail=0;	
+				   first_to_be_process++;
+	            }
+			  else
+			  	{
+                   break;
+			    }
+			}
+          else
+          	{
+                 first_to_be_process++;   //if it is NULL or disconnect,send the next.
+		    }
+		 
+	    }
+
+}
+/**
+  * @brief TCP callback function for sending data
+  * @param arg: pointer to send data
+  * @param pcb: the pcb that send data 
+  * @param len: the length of the data
+  * @retval err_t
+  */
+static err_t http_sent(void *arg, struct tcp_pcb *pcb, u16_t len)
+{
+   //callback after sending data successfully
+   //can used for detectiving the state of the connection
+   //not used in the project.
+}
+
+#if 0
+void ethernet_send_start(struct tcp_pcb *pcb)
+{
+   err_t err=ERR_VAL;
+   if((err=tcp_output(pcb))==ERR_OK)
+   	{
+   	    err=ERR_OK;
+       //tcp_close(connected_pcb);
+    }
+}
+#endif
+/**
+  * @brief check the state of the connection
+  
+  * @retval void
+  */
+void tcp_connection_state_check(void)
+{
+    u8_t i=0,j=0;
+	u8_t flag =0;
+	struct tcp_pcb *pcb=tcp_active_pcbs;
+	
+    for(i=0;i<TCP_CLIENT_NUM;i++){
+		pcb=tcp_active_pcbs;
+		j=0;
+		while(pcb != NULL)
+			{
+              if(p_tcp[i].pcb==pcb){ 
+			  	flag = 1;
+			  	break;
+              	}
+			  if(pcb==pcb->next) break; //in case that the pcb->next points to itself.
+			  pcb=pcb->next;
+			  j++;                      //RC1590 support 6 client but one is for ethernet upgrading.             
+			  if(j==MEMP_NUM_TCP_PCB) 
+			  	{
+			  	  pcb->next=NULL;   //in case that there is a ring in the linked list---tcp_active_pcbs;
+				  break;
+			  	}
+		    }
+		
+		if(flag==1)     //find the p_tcp[i].pcb in the linked list---tcp_active_pcbs.
+			{
+			  //if p_tcp[i].pcb->state is not established, it must set the p_tcp[i].state to TCP_CLOSED.Otherwise the
+			  //new request for connecting cannot be accept.
+              flag=0;
+		      if(p_tcp[i].state==TCP_CONNECTED && p_tcp[i].pcb->state!=ESTABLISHED) 
+			    {
+			      CloseConnection(p_tcp[i].pcb);
+			      p_tcp[i].state=TCP_CLOSED;           
+			  }
+			}
+		else
+			{
+			  // if it is not found in the linked list, the p_tcp[i].pcb is an illegal address. delete it.
+			  p_tcp[i].pcb=NULL;
+              p_tcp[i].state=TCP_CLOSED;
+		    }
+    	}
+}
+/**
+  * @brief receive the data from ethernet
+  * @param arg: pointer to send data
+  * @param pcb: the pcb that received data
+  * @param p:   the pointer of that received data buf
+  * @param err: the errorr message of receive function
+  * @retval err
+  */
+static err_t message_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t err)
+{
+     int32_t i,len=0;
+     char *data;
+     struct message_state *hs;
+  
+     hs = arg;
+
+     if (err == ERR_OK && p != NULL)
+      {
+        /* Inform TCP that we have taken the data */
+        tcp_recved(pcb, p->tot_len);
+        
+        if (hs->file == NULL)
+            {
+              data=p->payload;
+			  len=p->len;
+			  for(i=0;i<len;i++)
+			  	{
+                  ethernet_put_data(data[i]);				  
+			    }		  
+            }
+        pbuf_free(p);
+      }   
+     return err;
+}
+/**
+  * @brief  callback function on TCP connection setup ( on port 80)
+  * @param  arg: pointer to an argument structure to be passed to callback function
+  * @param  pcb: pointer to a tcp_pcb structure
+  * &param  err: Lwip stack error code
+  * @retval err
+  */
+static err_t client_accept(void *arg, struct tcp_pcb *pcb, err_t err)
+{
+  struct message_state *hs;
+  u8_t i;
+  //TCP_BUF *p_tcp;
+
+  /* Allocate memory for the structure that holds the state of the connection */
+  hs = mem_malloc(sizeof(struct message_state));
+
+  //p_tcp=mem_malloc(sizeof(TCP_BUF));
+  
+  if (hs == NULL)
+  {
+    return ERR_MEM;
+  }
+
+  /* Initialize the structure. */
+  hs->file = NULL;
+  hs->left = 0;
+  
+  /* Tell TCP that this is the structure we wish to be passed for our
+     callbacks. */
+  tcp_arg(pcb, hs);
+
+  /* Tell TCP that we wish to be informed of incoming data by a call
+     to the http_recv() function. */
+  tcp_recv(pcb, message_recv);
+
+  tcp_err(pcb, conn_err);
+
+  tcp_poll(pcb, message_poll, 1);
+  
+  tcp_sent(pcb, http_sent);
+  
+  pcb->so_options |= SOF_KEEPALIVE;   //start the function of heart beat function
+
+  //check if the client buffer is full
+  for(i=0;i<TCP_CLIENT_NUM;i++)       
+  	{
+      if(p_tcp[i].pcb==NULL || p_tcp[i].state == TCP_CLOSED) break;
+    }
+
+  //if the client is already TCP_CLIENT_NUM, it should close the pcb.
+  if(i==TCP_CLIENT_NUM){ 
+      close_conn(pcb, NULL);
+	  tcp_abandon(pcb, 1);
+	  return ERR_VAL;
+  	}
+  else
+  	{
+      p_tcp[i].state=TCP_CONNECTED;
+      p_tcp[i].head=p_tcp[i].tail=p_tcp[i].left=0;
+      memset(p_tcp[i].buffer,0,TCP_SND_BUF_LEN);
+      p_tcp[i].pcb=pcb;
+  
+      return ERR_OK;
+  	}
+}
+
+#if 0
+static err_t tcp_http_connected(void *arg, struct tcp_pcb *tpcb, err_t err)
+{
+  struct message_state *hs;
+  //uint16_t i=0;
+  if(err==ERR_OK)
+    {
+      hs=mem_malloc(sizeof(struct message_state));
+
+     if(hs==NULL)
+       {
+         return ERR_MEM;
+       }
+     hs->file=NULL;
+     hs->left=0;
+     
+     tcp_arg(tpcb, hs);
+     /* Tell TCP that we wish to be informed of incoming data by a call
+        to the http_recv() function. */
+     tcp_recv(tpcb, message_recv);
+
+     tcp_err(tpcb, conn_err);
+
+     tcp_poll(tpcb, message_poll, 1);
+
+     //tcp_sent(tpcb,)
+#if 0
+     for(i=0;i<sizeof(data_html_get);i++)
+     {
+       if(strncmp(data_html_get,"Host: ",5))
+       {
+         
+       }
+     }
+#endif
+     //hs->file=data_html_get;
+     //hs->left=sizeof(data_html_get);     
+     send_data(tpcb,hs);
+    }
+  return ERR_OK;
+}
+#endif
+/**
+  * @brief  intialize TCP server  
+  * @param  none
+  * @retval none
+  */
+void tcp_server_init(void)
+{
+   struct tcp_pcb *pcb;
+   err_t err;
+   u16 port = 9596;
+   tcp_port=0;
+   pcb = tcp_new();
+   err=tcp_bind(pcb, IP_ADDR_ANY, port);
+   while(err!=ERR_OK && port<65535)    //if the port is occupied, it should use another port.
+   	{
+   	  port++;
+   	  err=tcp_bind(pcb, IP_ADDR_ANY, port);
+   	}
+   if(err==ERR_OK)
+   	{
+      tcp_port=port;
+   	}
+   pcb = tcp_listen(pcb);
+   tcp_accept(pcb, client_accept);
+   listenning_pcb=pcb;
+}
+
+/**
+  * @brief  intialize UDP server  
+  * @param  none
+  * @retval none
+  */
+void udp_server_init (void)
+{
+  err_t err;
+  u16_t port = 1890;
+  static struct udp_pcb *UDPpcb;
+  
+  #ifdef LWIP_IGMP
+  //join the multi cast group.
+  IP4_ADDR(&multi_addr,239,255,255,220);                           
+  err=igmp_joingroup(IP_ADDR_ANY,(struct ip_addr *)(&multi_addr));
+  //if(err!=ERR_OK) while(1);            //delete the while loop
+  #endif
+  /* create a new UDP PCB structure  */
+  UDPpcb = udp_new();
+
+  if (!UDPpcb)
+  {
+    /* Error creating PCB. Out of Memory  */
+    return ;
+  }
+  /* Bind this PCB to port 1890  */
+  err = udp_bind(UDPpcb, IP_ADDR_ANY, port);
+  
+  tUDPpcb=UDPpcb;
+  if (err == ERR_OK)
+  {
+    /* Initialize receive callback function  */
+    udp_recv(UDPpcb, &udp_server_receive_callback, NULL);
+  } 
+}
+/**
+  * @brief  callback for udp receive function  
+  * @param  arg: pointer to?
+  * @param  upcb: the udp pcb of which received data
+  * @param  pkt_buf: pointer to the receive data
+  * @param  addr: the IP address of the remote controller
+  * @param  port: the port of UDP connection
+  * @retval none
+  */
+void udp_server_receive_callback (void *arg, struct udp_pcb *upcb, struct pbuf *pkt_buf,
+                        struct ip_addr *addr, u16_t port)
+{
+
+  char send_data[100];
+  /* copy packet payload to data_buffer */
+  if(pkt_buf->len>1000) return;
+  pbuf_copy_partial(pkt_buf, data_buffer, pkt_buf->len, 0);
+  data_buffer[pkt_buf->len+1] = 0;
+  
+  if(!strcmp("Discover ROTEL RC-1590",(char const *)data_buffer)) 
+  	{
+  	      strcpy(send_data,"Notify RC-1590 IP:");
+          strcat(send_data,(char const *)iptxt);
+          strcat(send_data," Port:");
+		  sprintf(&send_data[strlen(send_data)],"%d",tcp_port);
+          udp_sendx(send_data,strlen(send_data));
+    }
+  udp_disconnect(upcb);
+  pbuf_free(pkt_buf);
+}
+/**
+  * @brief  send data to UDP pcb  
+  * @param  data: pointer to the message
+  * @param  len:  the length of the message
+  * @retval none
+  */
+int udp_sendx(char *data, u16_t len) 
+{
+    int ret=-2; 
+      {
+        struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT,len, PBUF_RAM);
+        memcpy(p->payload, data, len);
+        udp_sendto(tUDPpcb, p,(struct ip_addr *) (&multi_addr),1890);
+        pbuf_free(p);
+    }
+    return ret;
+}
+
+#ifdef _CHECK_SW_VERSION
+static const char Content_Length[17] = 
+/* Content Length */
+{0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x2d, 0x4c, 0x65, 0x6e, 0x67,0x74, 0x68, 0x3a, 0x20, };
+static uint32_t ContentLengthOffset =0;
+static  char data_html_get[]={
+0x47,0x45,0x54,0x20,0x2f,0x52,0x43,0x2d,
+0x31,0x35,0x39,0x30,0x2f,0x52,0x43,0x31,
+0x35,0x39,0x30,0x2e,0x62,0x69,0x6e,0x20,
+0x48,0x54,0x54,0x50,0x2f,0x31,0x2e,0x31,
+0x0d,0x0a,0x41,0x63,0x63,0x65,0x70,0x74,
+0x3a,0x20,0x2a,0x2f,0x2a,0x0d,0x0a,0x41,
+0x63,0x63,0x65,0x70,0x74,0x2d,0x4c,0x61,
+0x6e,0x67,0x75,0x61,0x67,0x65,0x3a,0x20,
+0x7a,0x68,0x2d,0x63,0x6e,0x0d,0x0a,0x75,
+0x73,0x65,0x72,0x2d,0x41,0x67,0x65,0x6e,
+0x74,0x3a,0x20,0x4d,0x6f,0x7a,0x69,0x6c,
+0x6c,0x61,0x2f,0x34,0x2e,0x30,0x20,0x28,
+0x63,0x6f,0x6d,0x70,0x61,0x74,0x69,0x62,
+0x6c,0x65,0x3b,0x20,0x4d,0x53,0x49,0x45,
+0x38,0x2e,0x30,0x3b,0x20,0x77,0x69,0x6e,
+0x64,0x6f,0x77,0x73,0x20,0x4e,0x54,0x20,
+0x35,0x2e,0x31,0x3b,0x20,0x54,0x72,0x69,
+0x64,0x65,0x6e,0x74,0x2f,0x34,0x2e,0x30,
+0x3b,0x20,0x49,0x6e,0x66,0x6f,0x70,0x61,
+0x74,0x68,0x2e,0x32,0x3b,0x20,0x2e,0x4e,
+0x45,0x54,0x34,0x2e,0x30,0x45,0x3b,0x20,
+0x42,0x4f,0x49,0x45,0x38,0x3b,0x20,0x45,
+0x4e,0x55,0x53,0x4d,0x53,0x43,0x4f,0x4d,
+0x29,0x0d,0x0a,0x43,0x61,0x63,0x68,0x65,
+0x2d,0x43,0x6f,0x6e,0x74,0x72,0x6f,0x6c,
+0x3a,0x20,0x6e,0x6f,0x2d,0x63,0x61,0x63,
+0x68,0x65,0x0d,0x0a,0x43,0x6f,0x6e,0x65,
+0x63,0x74,0x69,0x6f,0x6e,0x3a,0x20,0x4b,
+0x65,0x65,0x70,0x2d,0x41,0x6c,0x69,0x76,
+0x65,0x0d,0x0a,0x48,0x6f,0x73,0x74,0x3a,
+0x20,0x77,0x77,0x77,0x2e,0x72,0x6f,0x74,
+0x65,0x6c,0x75,0x70,0x67,0x72,0x61,0x64,
+0x65,0x2e,0x63,0x6f,0x6d,0x0d,0x0a,0x43,
+0x6f,0x6e,0x6e,0x65,0x63,0x74,0x69,0x6f,
+0x6e,0x3a,0x20,0x6b,0x65,0x65,0x70,0x2d,
+0x41,0x6c,0x69,0x76,0x65,0x0d,0x0a,0x0d,
+0x0a
+};
+void httpd_client_init(void)
+{
+  err_t  dns_err;
+  struct ip_addr ipaddrServer;
+  //dns_parameter_set();
+ // err_t  dns_err;
+  //struct http_state *hs;
+  dns_err=dns_gethostbyname("www.rotelupgrade.com",&ipaddrServer,dns_server_found,NULL);
+  if(dns_err != ERR_OK && dns_err != ERR_INPROGRESS)
+  	{
+       SW_version_status=SW_GET_VERSION_FAILED;
+    }
+  if(dns_err == ERR_OK)
+  {
+    dns_server_found(NULL,&ipaddrServer,NULL);
+  }
+}
+void dns_server_found(const char *name,struct ip_addr *ipaddrServer,void *arg)
+{
+    struct tcp_pcb *pcb;
+    err_t  err;
+	u8_t i=0;
+    
+    if((ipaddrServer) && (ipaddrServer->addr))
+    { 
+       /*create new pcb*/
+       pcb = tcp_new();
+       /* bind HTTP traffic to pcb */
+       if((err=tcp_bind(pcb, IP_ADDR_ANY, 80)) != ERR_OK)
+       	{
+           SW_version_status=SW_GET_VERSION_FAILED;
+	    }
+	    
+       if((err=tcp_connect(pcb, ipaddrServer, 80, tcp_client_connected)) != ERR_OK)
+       	{
+           SW_version_status=SW_GET_VERSION_FAILED;
+	    }
+	   connected_pcb_upgrade=pcb;
+    }
+}
+static err_t tcp_client_connected(void *arg, struct tcp_pcb *tpcb, err_t err)
+{
+  struct message_state *hs;
+  if(err==ERR_OK)
+    {
+      hs=mem_malloc(sizeof(struct message_state));
+
+     if(hs==NULL)
+       {
+         return ERR_MEM;
+       }
+     hs->file=NULL;
+     hs->left=0;
+     
+     tcp_arg(tpcb, hs);
+     /* Tell TCP that we wish to be informed of incoming data by a call
+        to the http_recv() function. */
+     tcp_recv(tpcb, http_client_recv);
+
+     tcp_err(tpcb, conn_err);
+
+     tcp_poll(tpcb, http_client_poll, 10);
+
+     hs->file=data_html_get;
+     hs->left=sizeof(data_html_get);     
+     send_data(tpcb,hs);
+     return ERR_OK;
+    }
+  return err;
+}
+//char test_data[1520];
+char *mode="RC-1590_";
+extern char str_RC1590SWver[];
+//int32_t test_count=0;
+static err_t http_client_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t err)
+{
+     int32_t i=0,len=0;
+     u8 mode_len;
+     char *data;
+     struct message_state *hs;
+	 uint32_t total_length=0;
+     
+     hs = arg;
+
+     if (err == ERR_OK && p != NULL)
+      {
+         /* Inform TCP that we have taken the data */
+       // test_len=p->tot_len;
+        tcp_recved(pcb, p->tot_len);
+        
+        if (hs->file != NULL)
+            {
+              data = p->payload;
+              len = p->tot_len;
+	          //memcpy(test_data,data,len);
+
+              if(strncmp(data,"HTTP/1.1 200 OK",15)==0 )
+                {
+                  total_length=Parse_Content_Length(data,len);
+                  if(total_length!=0)
+                    {
+                     for(i=ContentLengthOffset;i<len;i++)
+                        {
+                          mode_len=strlen(mode);
+                          if(strncmp(mode,data+i,mode_len)==0)
+                            {
+                              SW_version_status=firmware_version_check(data+i+mode_len,str_RC1590SWver);
+                              break;
+                            }
+                    }
+                   }
+                }
+            }
+        if(pcb != NULL){
+			CloseConnection(connected_pcb_upgrade);
+        	}
+        pbuf_free(p);
+      }
+     return ERR_OK;
+}
+int  firmware_version_check(char *FW_on_server,char* current_version)
+{
+     u8 i=0;
+	 CHECK_SW_TYPEDEF ret=SW_GET_VERSION_STATUS;
+
+	 for(i=0;i<10 && FW_on_server[i] != '\0' && current_version[i] != '\0';i++)
+	 	{
+          if(FW_on_server[i]>current_version[i])
+          	{
+              ret=SW_NEW_VERSION_EXISTED;
+			  return ret;
+		    }
+		  else if(FW_on_server[i]<current_version[i])
+		  	{
+		  		break;
+		  	}
+	    }
+	 ret=SW_UP_TO_DATE;
+	 return ret;
+}
+/**
+  * @brief tcp poll callback function
+  * @param arg: pointer to an argument to be passed to callback function
+  * @param pcb: pointer on tcp_pcb structure
+  * @retval err_t
+  */
+static err_t http_client_poll(void *arg, struct tcp_pcb *pcb)
+{
+  if (arg == NULL)
+  {
+    tcp_close(pcb);
+  }
+  else
+  {
+    send_data(pcb, (struct message_state *)arg);
+  }
+  return ERR_OK;
+}
+static uint32_t Parse_Content_Length(char *data, uint32_t len)
+{
+  uint32_t i=0,size=0, S=1;
+  int32_t j=0;
+  char sizestring[6], *ptr;
+   
+  ContentLengthOffset =0;
+  
+  /* find Content-Length data in packet buffer */
+  for (i=0;i<len;i++)
+  {
+    if (strncmp ((char*)(data+i), Content_Length, 16)==0)
+    {
+      ContentLengthOffset = i+16;
+      break;
+    }
+  }
+  /* read Content-Length value */
+  if (ContentLengthOffset)
+  {
+    i=0;
+    ptr = (char*)(data + ContentLengthOffset);
+    while(*(ptr+i)!=0x0d)
+    {
+      sizestring[i] = *(ptr+i);
+      i++;
+      ContentLengthOffset++; 
+    }
+    if (i>0)
+    {
+      /* transform string data into numeric format */
+      for(j=i-1;j>=0;j--)
+      {
+        size += (sizestring[j]-0x30)*S;
+        S=S*10;
+      }
+    }
+  }
+  return size;
+}
+#endif
+/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

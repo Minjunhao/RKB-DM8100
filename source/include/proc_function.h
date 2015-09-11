@@ -1,11 +1,28 @@
 #ifndef _PROC_FUNC
 #define _PROC_FUNC
+#define IS_CHANNEL(x)     (x<=4)?0:(1)
+#define IS_NULL(x)        ((x)==NULL)? 1:0
 #define CONSTRUCT_TABLE_SIZE 33
 
 #define CHANNEL_A   0
 #define CHANNEL_B   1
 #define CHANNEL_C   2
 #define CHANNEL_D   3
+#define ALL_CHANNEL 4
+
+#define MUTE_CH_A   0
+#define MUTE_CH_B   1
+#define MUTE_CH_C   2
+#define MUTE_CH_D   3
+#define MUTE_ALL    4
+
+
+#define INPUT_MODE_ANALOG   0
+#define INPUT_MODE_DIGITAL  1
+#define INPUT_MODE_AUTO     3
+
+extern u8  mode_display_update;
+extern u8  volume_send_delay_time;
 
 
 typedef struct ak4117_chip {
@@ -32,11 +49,13 @@ typedef struct channel {
   unsigned char channel;
   unsigned char chip_id;
   unsigned char digital_nAnalog;       //njm2752 for selecting
+  unsigned char digital_analog_mode;
   AK4117_TYPE   *ak4117_data;
   VOL_CTRL_TYPE *vol_data;
   unsigned char local_speaker_src;  //local speaker output   bit0~3: input channel sel, bit4:0-output on, 1-output off
   unsigned char link_channel_src;    //select link source to output
   unsigned char amp_channel_on;
+  unsigned char mute_status;
 
   void (*p_ak4117_func)(struct channel *);       //for AK4117 control
   
@@ -44,10 +63,13 @@ typedef struct channel {
   void (*p_local_speaker_src_sel)(struct channel *,unsigned char);
   void (*p_link_chanel_src_sel)(struct channel *,unsigned char ); 
   
-  void (*p_vol_control)(struct channel *,unsigned char);
+  void (*p_vol_control)(struct channel *,unsigned char,unsigned char,unsigned char);
+  void (*p_vol_ctrl_l)(struct channel*, unsigned char);
+  void (*p_vol_ctrl_r)(struct channel*, unsigned char);
   void (*p_bass_control)(struct channel *, unsigned char);
   void (*p_treb_control)(struct channel *, unsigned char);
   void (*p_balance_contrl)(struct channel *,unsigned char);
+  void (*p_mute_ctrl)(struct channel *,unsigned char);
 } Channel_TYPE;
 
 
@@ -99,4 +121,11 @@ void	PowerOn_exec_3(void);
 void Check_DirectMuteOnOff(void);
 //20140523
 void signal_sensingPort_check(void);
+void backup_range_check(u8 type);
+void backup_reconstruct(unsigned char i, unsigned char *addr,unsigned char flag);
+void mode_reset(void);
+void mode_mute_on(u8 chunnel);
+void RKB_channel_initial(void);
+void mode_amp_protection_check(void);
+void mode_ak4117_check(void);
 #endif

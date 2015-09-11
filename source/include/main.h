@@ -36,6 +36,7 @@
 #endif
 **********************************************************/
 #define _RKB_DM8100
+//#define _TEST
 #define UART4_ENABLE
 #define UART5_ENABLE
 #define FROM_MP2_CHANGE_TEMP					//20140731 : from MP2(add Signal Sensing Mode) change to newTemp.
@@ -59,8 +60,9 @@
 //#define 	UART1_SCREEN_DEBUG			//rs232 out debugger [test:20100430]
 //#define 	UART1_SCREENUTF8_DEBUG		//rs232 out debugger [test:20100511]
 
-#define 	IAP_UPGRADE                 //for iAP upgrade
+//#define 	IAP_UPGRADE                 //for iAP upgrade
 #define 	AMP_POWERON_ENABLE          //20121011 : 
+#define     _TEST
 //
 //
 //  test for RA1570 2 Line iPod display
@@ -156,13 +158,15 @@ ASCii Rotel-Link
 *********************************************************/
 #define 	MAX_STRING_TEXT_LENGTH		20			//20100201
 
+#define LAN8720_PHY_ADDRESS    0x00
+
 // on,off 
 #define	ON							1
 #define	OFF							0
 
 
-#define	TRUE						1
-#define	FALSE						0
+#define	RKB_TRUE					1
+#define	RKB_FALSE					0
 #define	OK							1
 #define	NO							0 
 #define	YES							1
@@ -396,6 +400,7 @@ ASCii Rotel-Link
 #define SK_CD_9				55		
 #define SK_CD_10			56		
 
+
 #define SK_CD_PROG			57		
 #define SK_CD_REVIEW		58		
 #define SK_CD_CLEAR			59
@@ -591,6 +596,31 @@ ASCii Rotel-Link
 #define SK_INPUT_SEL_AUTO			226		//20150302 : RKB
 #define SK_INPUT_SEL_DIGITAL		227		//20150302 : RKB
 #define SK_INPUT_SEL_ANALOG			228		//20150302 : RKB
+
+#define SK_SET_BALANCE_L            229
+#define SK_SET_BALANCE_R            230
+#define SK_SET_FAN_LS_ON            231
+#define SK_SET_FAN_LS_OFF           232
+#define SK_SET_FAN_HS_ON            233
+#define SK_SET_FAN_HS_OFF           234
+#define SK_SET_SHUTDOWN             235
+#define SK_SET_SMPS_SHUTDOWN        236
+#define SK_SET_VOLUME_TX_DLY        237
+#define SK_SET_SMPS_FAN_ON          238
+#define SK_SET_SMPS_FAN_OFF         239
+#define SK_SET_VOLUME               240
+#define SK_SET_VOLUME_L             241
+#define SK_SET_VOLUME_R             242
+#define SK_SET_LED_DIMMER           243
+
+#define SK_LOCAL_INPUT_A            244
+#define SK_LOCAL_INPUT_B            245
+#define SK_LOCAL_INPUT_C            246
+#define SK_LOCAL_INPUT_D            247
+#define SK_LINK_INPUT_A             248
+#define SK_LINK_INPUT_B             249
+#define SK_LINK_INPUT_C             250
+#define SK_LINK_INPUT_D             251
 
 #define SK_REFRESH			0xff	//255
 

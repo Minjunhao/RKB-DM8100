@@ -23,6 +23,56 @@ typedef enum {
 	KM_KEYOFF
 }Kmode_s;
 
+typedef	struct Key_t{
+	byte KeyScan[SCANNOS];
+	byte KeyImsi[SCANNOS];
+	byte KeyBuf[SCANNOS];
+	byte KeyData[SCANNOS];
+	byte KeyHoldTime[SCANNOS];
+	int  KeyRepeatTime[SCANNOS];
+	byte KeyMulti;
+	byte KeyMode[SCANNOS];
+	byte KeyOk[SCANNOS];
+	byte_flags KeyStatus1;
+	byte_flags KeyStatus2;
+	byte_flags KeyStatus3;
+	byte_flags KeyStatus4;
+	//byte_flags KeyStatus5;
+	//byte_flags KeyStatus6;
+} Key_t;
+
+#define f_KeyRefresh1	key.KeyStatus1.byte_bit.bit1
+#define f_KeyRepeatOk1	key.KeyStatus1.byte_bit.bit2
+#define f_KeyRepeatly1	key.KeyStatus1.byte_bit.bit3
+#define f_KeyReleased1	key.KeyStatus1.byte_bit.bit4
+//
+#define f_KeyRefresh2	key.KeyStatus2.byte_bit.bit1
+#define f_KeyRepeatOk2	key.KeyStatus2.byte_bit.bit2
+#define f_KeyRepeatly2	key.KeyStatus2.byte_bit.bit3
+#define f_KeyReleased2	key.KeyStatus2.byte_bit.bit4
+//
+#define f_KeyRefresh3	key.KeyStatus3.byte_bit.bit1
+#define f_KeyRepeatOk3	key.KeyStatus3.byte_bit.bit2
+#define f_KeyRepeatly3	key.KeyStatus3.byte_bit.bit3
+#define f_KeyReleased3	key.KeyStatus3.byte_bit.bit4
+//
+#define f_KeyRefresh4	key.KeyStatus4.byte_bit.bit1
+#define f_KeyRepeatOk4	key.KeyStatus4.byte_bit.bit2
+#define f_KeyRepeatly4	key.KeyStatus4.byte_bit.bit3
+#define f_KeyReleased4	key.KeyStatus4.byte_bit.bit4
+//
+#define f_KeyRefresh5	key.KeyStatus5.byte_bit.bit1
+#define f_KeyRepeatOk5	key.KeyStatus5.byte_bit.bit2
+#define f_KeyRepeatly5	key.KeyStatus5.byte_bit.bit3
+#define f_KeyReleased5	key.KeyStatus5.byte_bit.bit4
+//
+#define f_KeyRefresh6	key.KeyStatus6.byte_bit.bit1
+#define f_KeyRepeatOk6	key.KeyStatus6.byte_bit.bit2
+#define f_KeyRepeatly6	key.KeyStatus6.byte_bit.bit3
+#define f_KeyReleased6	key.KeyStatus6.byte_bit.bit4
+//
+
+
 
 
 #define FRONT_REPEAT          0x10
@@ -80,7 +130,8 @@ typedef enum {
 //
 #define STM_MEMORY			0x7e
 
-
+extern unsigned char current_key[8];
+extern vu16 ADC_Val[4];
 /*----------------------------------------------------------------------------*/
 void adc_KeyRestart(unsigned char i);							//20130527
 void adc_KeyInit(void);
@@ -90,7 +141,10 @@ void adc_KeyBoardPer10ms(void);
 //void adc_KeyMake(void);
 void adc_KeyRead(unsigned char Lines);
 void adc_KeyMake(unsigned char Lines);
+void mode_temperature_check(void);
+void temperature_read(void);
 
+void DMA2_Stream1_IRQHandler(void);	
 
 #endif	//__ADC_H__
 

@@ -19,8 +19,6 @@ DESCRIPTION     : Used Interrupt function
 //#include "stm32f2xx.h"
 #include "config.h"
 #include "adckey.h"
-#include "adckey.ext"
-#include "function.ext"
 #include "netconf.h"
 #include "main.h"
 #include "initmcu.h"
@@ -45,7 +43,6 @@ DESCRIPTION  : disable IRQ & Each interrupt Function
 COMMENTS     : 
 -----------------------------------------------------------------------------*/
 
-u8 mode_AHB_prescaler;
 
 void ini_DisableInterrupt(void)
 {
@@ -250,7 +247,7 @@ void RCC_Configuration(void)
   	}
   	/* DMA clock enable */
 
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
 
 	RCC_AHB1PeriphClockCmd(  RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB
 		                   | RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD
@@ -521,7 +518,7 @@ void NVIC_Configuration(void)
  	NVIC_Init(&NVIC_InitStructure);
 #endif
 //#ifdef ADC_ENABLEx	
-	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream1_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream1_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;  
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -1402,7 +1399,7 @@ void GPIO_Configuration(unsigned char type)
 
 		   GPIO_Init(GPIOD,&GPIO_InitStructure);          
     }
-   if(type ! = 0)
+   if(type != 0)
    	{
 
 		   /*PORT E*/
@@ -1421,7 +1418,7 @@ void GPIO_Configuration(unsigned char type)
 		   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 |GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_10 | GPIO_Pin_12
 		                                |GPIO_Pin_14;
 		   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-		   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+		   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 
 		   GPIO_Init(GPIOE,&GPIO_InitStructure);
 
@@ -1450,12 +1447,18 @@ void GPIO_Configuration(unsigned char type)
 		   /*configure NTC-AMP1(PF3) NTC-AMP2(PF4) NTC-SMPS(PF5) NTC-SMPS(PF6)
 		     F_VOL_A(PF7) F_VOL_B(PF8) F_VOL_C(PF9) F_VOL_D(PF10) as input no pullup*/
 
-		   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6
-		                                |GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10;
+		   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10;
 		   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
 		   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 
 		   GPIO_Init(GPIOF,&GPIO_InitStructure);
+           /*configure NTC-AMP1(PF3) NTC-AMP2(PF4) NTC-SMPS(PF5) NTC-SMPS(PF6)*/
+		   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6;
+
+		   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+		   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+
+		   GPIO_Init(GPIOF,&GPIO_InitStructure);		   
 
            /*configure 4117_RST(PF15) as output pullup*/
 		   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
@@ -2009,6 +2012,7 @@ void ADC_Configuration_PP(unsigned char type)
   	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
   	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
   	DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+	
   	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
   	DMA_Init(DMA1_Channel1, &DMA_InitStructure);
   	// Enable DMA1 channel1 */
@@ -2148,8 +2152,8 @@ void ADC_Configuration(unsigned char type)
 	   /*DMA1 channel_1 config*/
 
 	   DMA_DeInit(DMA2_Stream1);
-	   DMA_InitStructure.DMA_Channel = DMA_Channel_1;
-	   DMA_InitStructure.DMA_PeripheralBaseAddr = ADC3_DR_Address;
+	   DMA_InitStructure.DMA_Channel = DMA_Channel_2;
+	   DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)0x4001224C;
 	   DMA_InitStructure.DMA_Memory0BaseAddr = (u32)&ADC_Val;
 	   DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
 	   DMA_InitStructure.DMA_BufferSize=4;
@@ -2164,9 +2168,12 @@ void ADC_Configuration(unsigned char type)
 	   DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
 	   DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
 
-	   DMA_Init(DMA1_Stream1,&DMA_InitStructure);
+	   DMA_Init(DMA2_Stream1,&DMA_InitStructure);
 
-	   DMA_Cmd(DMA1_Stream1, ENABLE);
+	   DMA_Cmd(DMA2_Stream1, ENABLE);
+
+  	   /* Enable DMA1 IT interupt */
+	   DMA_ITConfig(DMA2_Stream1,DMA_IT_TC,ENABLE);	   
 
 	   /*ADC COMMON config*/
 
@@ -2181,7 +2188,7 @@ void ADC_Configuration(unsigned char type)
 	   ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
 	   ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
 	   ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConvEdge_None;
-	   ADC_InitStructure.ADC_NbrOfConversion = 8;
+	   ADC_InitStructure.ADC_NbrOfConversion = 4;
 	   ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;
 	   ADC_InitStructure.ADC_ScanConvMode = ENABLE;
 
@@ -2192,9 +2199,9 @@ void ADC_Configuration(unsigned char type)
 	   //ADC_RegularChannelConfig(ADC3, ADC_Channel_6, 3, ADC_SampleTime_56Cycles);
 	   //ADC_RegularChannelConfig(ADC3, ADC_Channel_7, 4, ADC_SampleTime_56Cycles);
 	   //ADC_RegularChannelConfig(ADC3, ADC_Channel_8, 5, ADC_SampleTime_56Cycles);
-	   ADC_RegularChannelConfig(ADC3, ADC_Channel_9, 6, ADC_SampleTime_56Cycles);    //NTC.SMPS1
-	   ADC_RegularChannelConfig(ADC3, ADC_Channel_14, 7, ADC_SampleTime_56Cycles);   //NTC.AMP2
-	   ADC_RegularChannelConfig(ADC3, ADC_Channel_15, 8, ADC_SampleTime_56Cycles);   //NTC.AMP1
+	   ADC_RegularChannelConfig(ADC3, ADC_Channel_9, 2, ADC_SampleTime_56Cycles);    //NTC.SMPS1
+	   ADC_RegularChannelConfig(ADC3, ADC_Channel_14, 3, ADC_SampleTime_56Cycles);   //NTC.AMP2
+	   ADC_RegularChannelConfig(ADC3, ADC_Channel_15, 4, ADC_SampleTime_56Cycles);   //NTC.AMP1
 
 	   ADC_DMARequestAfterLastTransferCmd(ADC3, ENABLE);
 

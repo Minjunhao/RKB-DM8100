@@ -63,4 +63,5 @@ void s_Ak4114MsgRead(unsigned char typ, unsigned char s_data);
 void s_Ak4114MsgTrans(unsigned char typ);
 //20131022
 void S_4114_RESET(unsigned char i);
+void s_SmallWait(int s_data);
 

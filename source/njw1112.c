@@ -22,6 +22,7 @@
 #define _DELAY_TIME         500              //3.735us
 void njw1112_delay(u32 delay_time)
 {
+  
   while(--delay_time) {}
 }
 void njw1112_write_start(void)
@@ -68,7 +69,7 @@ void njw1112_register_write(u8 data,u8 addr)
 
    njw1112_delay(_DELAY_TIME);
    njw1112_delay(_DELAY_TIME);
-   njw1112_clk_ctrl(NJW1112_HIGH);
+   njw1112_lat_ctrl(NJW1112_HIGH);
    njw1112_delay(_DELAY_TIME);
 }
 /*
@@ -100,6 +101,7 @@ void njw1112_out_mute(u8 n_mute_on)
 /*
   a function for the Channel_TYPE
 */
+
 void njw1112_local_speaker_ctrl(Channel_TYPE *chunnel,u8 selector)
 {
    //chip_addr=0x0a
@@ -110,6 +112,7 @@ void njw1112_local_speaker_ctrl(Channel_TYPE *chunnel,u8 selector)
    	{
        case CHANNEL_A:
 	   	njw1112_register_write(selector,OUTPUT_A_ADDR | CHIP_ADDR_LOW);
+		
 	   	break;
 	   case CHANNEL_B:
 	   	njw1112_register_write(selector,OUTPUT_B_ADDR | CHIP_ADDR_LOW);

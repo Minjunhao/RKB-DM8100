@@ -42,4 +42,17 @@ extern FAN_STATUS fan_status;
 void fan_initial(void);
 void fan_hs_ctrl(u8 status);
 void fan_ls_ctrl(u8 status);
+void set_fan_hs_off_amp_temp(u8 temp);
+void set_fan_hs_on_amp_temp(u8 temp);
+void set_fan_ls_off_amp_temp(u8 temp);
+void set_fan_off_smps_temp(u8 temp);
+void set_fan_on_smps_temp(u8 temp);
+u8 get_fan_ls_on_amp_temp(void);
+u8 get_fan_hs_off_amp_temp(void);
+void fan_initial(void);
+void fan_timer_check(void);
+u8 get_fan_hs_on_amp_temp(void);
+u8 get_fan_off_smps_temp(void);
+u8 get_fan_ls_off_amp_temp(void);
+u8 get_fan_on_smps_temp(void);
 #endif

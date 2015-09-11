@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<Project>
+  <Desktop>
+    <Static>
+      <Debug-Log>
+        
+        
+      <ColumnWidth0>20</ColumnWidth0><ColumnWidth1>1541</ColumnWidth1></Debug-Log>
+      <Build>
+        <ColumnWidth0>20</ColumnWidth0>
+        <ColumnWidth1>1155</ColumnWidth1>
+        <ColumnWidth2>308</ColumnWidth2>
+        <ColumnWidth3>77</ColumnWidth3>
+      </Build>
+      <Workspace>
+        <ColumnWidths>
+          
+          
+          
+          
+        <Column0>214</Column0><Column1>27</Column1><Column2>27</Column2><Column3>27</Column3></ColumnWidths>
+      </Workspace>
+      <Disassembly>
+        <col-names>
+          
+          
+        <item>Disassembly</item><item>_I0</item></col-names>
+        <col-widths>
+          
+          
+        <item>500</item><item>20</item></col-widths>
+        <DisasmHistory/>
+        
+        
+      <ShowCodeCoverage>0</ShowCodeCoverage><ShowInstrProfiling>0</ShowInstrProfiling></Disassembly>
+      <Breakpoints>
+        <PreferedWindows>
+          
+          
+          
+          
+        <Position>3</Position><ScreenPosX>0</ScreenPosX><ScreenPosY>0</ScreenPosY><Windows/></PreferedWindows>
+        <col-names>
+          
+          
+        <item>Breakpoint</item><item>_I0</item></col-names>
+        <col-widths>
+          
+          
+        <item>500</item><item>35</item></col-widths>
+      </Breakpoints>
+    <WATCH_1><expressions><item>b_StreamFreq</item><item>b_4114Mode</item><item></item></expressions><col-names><item>Expression</item><item>Location</item><item>Type</item><item>Value</item></col-names><col-widths><item>139</item><item>150</item><item>100</item><item>100</item></col-widths></WATCH_1></Static>
+    <Windows>
+      
+      
+      
+    <Wnd1>
+        <Tabs>
+          <Tab>
+            <Identity>TabID-24991-29248</Identity>
+            <TabName>Debug Log</TabName>
+            <Factory>Debug-Log</Factory>
+            <Session/>
+          </Tab>
+          <Tab>
+            <Identity>TabID-24469-29258</Identity>
+            <TabName>Build</TabName>
+            <Factory>Build</Factory>
+            <Session/>
+          </Tab>
+        </Tabs>
+        
+      <SelectedTab>0</SelectedTab></Wnd1><Wnd2>
+        <Tabs>
+          <Tab>
+            <Identity>TabID-2972-29251</Identity>
+            <TabName>Workspace</TabName>
+            <Factory>Workspace</Factory>
+            <Session>
+              
+            <NodeDict><ExpandedNode>RKB-DM8100</ExpandedNode><ExpandedNode>RKB-DM8100/CMSIS</ExpandedNode><ExpandedNode>RKB-DM8100/EWARM</ExpandedNode><ExpandedNode>RKB-DM8100/STM32F2xx_StdPeriph_Driver</ExpandedNode><ExpandedNode>RKB-DM8100/User</ExpandedNode></NodeDict></Session>
+          </Tab>
+        </Tabs>
+        
+      <SelectedTab>0</SelectedTab></Wnd2><Wnd6>
+        <Tabs>
+          <Tab>
+            <Identity>TabID-13720-29255</Identity>
+            <TabName>Disassembly</TabName>
+            <Factory>Disassembly</Factory>
+            <Session/>
+          </Tab>
+        </Tabs>
+        
+      <SelectedTab>0</SelectedTab></Wnd6><Wnd7><Tabs><Tab><Identity>TabID-18174-27799</Identity><TabName>Watch 1</TabName><Factory>WATCH_1</Factory></Tab></Tabs><SelectedTab>0</SelectedTab></Wnd7></Windows>
+    <Editor>
+      
+      
+      
+      
+    <Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\adckey.mem</Filename><XPos>0</XPos><YPos>33</YPos><SelStart>1730</SelStart><SelEnd>1730</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Libraries\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_adc.c</Filename><XPos>0</XPos><YPos>213</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\eeprom.c</Filename><XPos>0</XPos><YPos>436</YPos><SelStart>9534</SelStart><SelEnd>9540</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Libraries\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_gpio.h</Filename><XPos>0</XPos><YPos>113</YPos><SelStart>4894</SelStart><SelEnd>4894</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\signal_sense.c</Filename><XPos>0</XPos><YPos>5</YPos><SelStart>387</SelStart><SelEnd>387</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\adckey.ext</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>15</SelStart><SelEnd>15</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\adckey.h</Filename><XPos>0</XPos><YPos>117</YPos><SelStart>3999</SelStart><SelEnd>3999</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\i2c.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>535</SelStart><SelEnd>535</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F2xx\system_stm32f2xx.c</Filename><XPos>0</XPos><YPos>381</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\cortexm3_macro.s</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\stm32f2xx_it.c</Filename><XPos>0</XPos><YPos>191</YPos><SelStart>5317</SelStart><SelEnd>5341</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\stm32f2xx_flash.icf</Filename><XPos>0</XPos><YPos>15</YPos><SelStart>907</SelStart><SelEnd>907</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\startup_stm32f2xx.s</Filename><XPos>0</XPos><YPos>116</YPos><SelStart>9101</SelStart><SelEnd>9124</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Libraries\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_dma.c</Filename><XPos>0</XPos><YPos>1162</YPos><SelStart>48599</SelStart><SelEnd>48599</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\ak4114.h</Filename><XPos>0</XPos><YPos>35</YPos><SelStart>1299</SelStart><SelEnd>1299</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\ak4114.mem</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>184</SelStart><SelEnd>184</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\ak4117.c</Filename><XPos>0</XPos><YPos>407</YPos><SelStart>9032</SelStart><SelEnd>9032</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\ak4114.c</Filename><XPos>0</XPos><YPos>630</YPos><SelStart>19812</SelStart><SelEnd>19812</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Libraries\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_rcc.h</Filename><XPos>0</XPos><YPos>241</YPos><SelStart>12072</SelStart><SelEnd>12072</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\timer.c</Filename><XPos>0</XPos><YPos>127</YPos><SelStart>4008</SelStart><SelEnd>4008</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\ak4117.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>83</SelStart><SelEnd>83</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Ethernet\inc\netconf.h</Filename><XPos>0</XPos><YPos>43</YPos><SelStart>2158</SelStart><SelEnd>2173</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F2xx\stm32f2xx.h</Filename><XPos>0</XPos><YPos>232</YPos><SelStart>15896</SelStart><SelEnd>15898</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\config.h</Filename><XPos>0</XPos><YPos>1</YPos><SelStart>674</SelStart><SelEnd>674</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Libraries\CMSIS\CM3\CoreSupport\core_cm3.h</Filename><XPos>0</XPos><YPos>532</YPos><SelStart>26614</SelStart><SelEnd>26621</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\signal_sense.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>53</SelStart><SelEnd>53</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\fan_ctrl.c</Filename><XPos>0</XPos><YPos>181</YPos><SelStart>3682</SelStart><SelEnd>3682</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Libraries\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_tim.c</Filename><XPos>0</XPos><YPos>2531</YPos><SelStart>90414</SelStart><SelEnd>90414</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\njw1112.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>43</SelStart><SelEnd>43</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\fan_ctrl.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>545</SelStart><SelEnd>545</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\uart.c</Filename><XPos>0</XPos><YPos>363</YPos><SelStart>9633</SelStart><SelEnd>9633</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\njw1112.c</Filename><XPos>0</XPos><YPos>12</YPos><SelStart>641</SelStart><SelEnd>641</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\RKB_portdef.h</Filename><XPos>0</XPos><YPos>160</YPos><SelStart>6614</SelStart><SelEnd>6614</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Libraries\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_gpio.c</Filename><XPos>0</XPos><YPos>389</YPos><SelStart>14529</SelStart><SelEnd>14529</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\njw1194.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>554</SelStart><SelEnd>554</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\njw1194.c</Filename><XPos>0</XPos><YPos>421</YPos><SelStart>10958</SelStart><SelEnd>10958</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\adckey.c</Filename><XPos>0</XPos><YPos>871</YPos><SelStart>31428</SelStart><SelEnd>31428</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\command_key.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>226</SelStart><SelEnd>226</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\proc_function.h</Filename><XPos>0</XPos><YPos>52</YPos><SelStart>1807</SelStart><SelEnd>1820</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\proc_function.c</Filename><XPos>0</XPos><YPos>91</YPos><SelStart>4561</SelStart><SelEnd>4561</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\power_led.c</Filename><XPos>0</XPos><YPos>44</YPos><SelStart>1361</SelStart><SelEnd>1368</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\command_key.c</Filename><XPos>0</XPos><YPos>405</YPos><SelStart>9575</SelStart><SelEnd>9575</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\main.c</Filename><XPos>0</XPos><YPos>22</YPos><SelStart>868</SelStart><SelEnd>868</SelEnd></Tab><ActiveTab>42</ActiveTab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\power_led.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>356</SelStart><SelEnd>356</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\RKB_initmcu.c</Filename><XPos>0</XPos><YPos>105</YPos><SelStart>2839</SelStart><SelEnd>2839</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\source\include\main.h</Filename><XPos>0</XPos><YPos>48</YPos><SelStart>3207</SelStart><SelEnd>3207</SelEnd></Tab></Pane><ActivePane>0</ActivePane><Sizes><Pane><X>1000000</X><Y>1000000</Y></Pane></Sizes><SplitMode>1</SplitMode></Editor>
+    <Positions>
+      
+      
+      
+      
+      
+    <Top><Row0><Sizes><Toolbar-0137a308><key>iaridepm.enu1</key></Toolbar-0137a308></Sizes></Row0><Row1><Sizes><Toolbar-08261180><key>debuggergui.enu1</key></Toolbar-08261180></Sizes></Row1></Top><Left><Row0><Sizes><Wnd2><Rect><Top>-2</Top><Left>-2</Left><Bottom>557</Bottom><Right>305</Right><x>-2</x><y>-2</y><xscreen>200</xscreen><yscreen>200</yscreen><sizeHorzCX>125000</sizeHorzCX><sizeHorzCY>242718</sizeHorzCY><sizeVertCX>191875</sizeVertCX><sizeVertCY>678398</sizeVertCY></Rect></Wnd2></Sizes></Row0></Left><Right><Row0><Sizes><Wnd7><Rect><Top>-2</Top><Left>-2</Left><Bottom>557</Bottom><Right>345</Right><x>-2</x><y>-2</y><xscreen>200</xscreen><yscreen>200</yscreen><sizeHorzCX>125000</sizeHorzCX><sizeHorzCY>242718</sizeHorzCY><sizeVertCX>216875</sizeVertCX><sizeVertCY>678398</sizeVertCY></Rect></Wnd7></Sizes></Row0><Row1><Sizes><Wnd6><Rect><Top>-2</Top><Left>343</Left><Bottom>557</Bottom><Right>543</Right><x>343</x><y>-2</y><xscreen>200</xscreen><yscreen>200</yscreen><sizeHorzCX>125000</sizeHorzCX><sizeHorzCY>242718</sizeHorzCY><sizeVertCX>125000</sizeVertCX><sizeVertCY>678398</sizeVertCY></Rect></Wnd6></Sizes></Row1></Right><Bottom><Row0><Sizes><Wnd1><Rect><Top>-2</Top><Left>-2</Left><Bottom>198</Bottom><Right>1602</Right><x>-2</x><y>-2</y><xscreen>1604</xscreen><yscreen>200</yscreen><sizeHorzCX>1002500</sizeHorzCX><sizeHorzCY>242718</sizeHorzCY><sizeVertCX>125000</sizeVertCX><sizeVertCY>242718</sizeVertCY></Rect></Wnd1></Sizes></Row0></Bottom><Float><Sizes/></Float></Positions>
+  </Desktop>
+</Project>
+
+

@@ -1,0 +1,6 @@
+---- tone_sw Matches (6 in 3 files) ----
+Njw1194.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):	   	//if(chunnel->vol_data->tone_sw == TONE_ON)
+Njw1194.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):	   	chunnel->vol_data->tone_sw = !(chunnel->vol_data->tone_sw);  //TONE ON/OFF
+Njw1194.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):   temp_tone_sw=chunnel->vol_data->tone_sw;
+Proc_function.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):          if(RKB_Channel[i].vol_data->tone_sw == TONE_ON)
+Proc_function.h (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source\include):  unsigned char tone_sw;

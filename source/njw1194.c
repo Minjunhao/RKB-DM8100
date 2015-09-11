@@ -34,6 +34,8 @@
 #define GET_BALANCE_LEFT_INX(x)       ((x)-((BALANCE_MAX)/2)-1)
 #define GET_BALANCE_RIGHT_INX(x)       (((BALANCE_MAX)/2)-(x)-1)
 
+#define IS_VOLUME(x)                  ((x)<=96)? (0):(1)
+
 const char balanceLevelTable[12][15] = {                      //20121101 : suda simple table
 	{1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,14,16,0},       //0?
 	{1, 2, 3, 4, 5, 6, 8,10,12,16,20,24,28,32,0},       //1?
@@ -98,12 +100,14 @@ void njw1194_write_register(u8 data, u8 addr)
 
    njw1194_delay(_DELAY_TIME);
    njw1194_delay(_DELAY_TIME);
+    njw1194_lat_ctrl(NJW1194_HIGH);
    njw1194_clk_ctrl(NJW1194_HIGH);
    njw1194_delay(_DELAY_TIME);   
 }
 /*
   njw1194 ajust the volume of the left channel 
 */
+u8 data_test;
 void njw1194_vol_ctrl_left(u8 data,u8 chip_addr)
 {
    njw1194_write_register(data,VOL_CTRL_LEFT | chip_addr);
@@ -144,12 +148,20 @@ void njw1194_bass_adjust(u8 data,u8 chip_addr)
 void njw1194_vol_ctrl(Channel_TYPE *chunnel,u8 volume)
 {
    u8 balance=chunnel->vol_data->balance;
-   u8 vol_adjust_by_balance=0,temp_vol,temp_vol_left,temp_vol_right;
+   u8 vol_adjust_by_balance=0,temp_vol,temp_vol_left=0,temp_vol_right=0;
 
-   chunnel->vol_data->vol=volume;
-   temp_vol=volume*2;
-
+   if(IS_VOLUME(volume)) 
+   	{   	   
+   	  return;
+   	}
+   if(chunnel == NULL) return;
    
+   chunnel->vol_data->vol = volume;
+   chunnel->vol_data->vol_left =  volume;
+   chunnel->vol_data->vol_right = volume;
+
+   /*caculate the balance only when vol_left==vol_right*/
+   temp_vol=volume*2;   
    if(volume==0)
    	{
        chunnel->vol_data->vol_left=VOLUME_MUTE_VAL;       //mute
@@ -159,31 +171,32 @@ void njw1194_vol_ctrl(Channel_TYPE *chunnel,u8 volume)
    	{
       if(balance == BALANCE_MAX/2)
    	      {
-             chunnel->vol_data->vol_left = (temp_vol);
-	         chunnel->vol_data->vol_right = (temp_vol);
+             chunnel->vol_data->vol_left = volume;
+	         chunnel->vol_data->vol_right = volume;
+             temp_vol_left=chunnel->vol_data->vol_left ;
+             temp_vol_right=chunnel->vol_data->vol_right;
           }
 	  else if(balance > BALANCE_MAX/2)
 	  	{
-            //left channel -  and right channel no adjust
-            
+            //left channel -  and right channel no adjust            
             vol_adjust_by_balance=balanceLevelTable[volume/10][GET_BALANCE_LEFT_INX(balance)];
 			if(vol_adjust_by_balance>0)
 				{
                    if(temp_vol>vol_adjust_by_balance)
                    	{
-                      chunnel->vol_data->vol_left = temp_vol-vol_adjust_by_balance;
+                      temp_vol_left = volume-vol_adjust_by_balance;
 				    }
 				   else
 				   	{
-                      chunnel->vol_data->vol_left = VOLUME_MUTE_VAL;  
+                      temp_vol_left = VOLUME_MUTE_VAL;  
 				    }
 			    }
 			else
 				{
-                   chunnel->vol_data->vol_left = VOLUME_MUTE_VAL;
+                   temp_vol_left = VOLUME_MUTE_VAL;
 			    }
 			
-			chunnel->vol_data->vol_right = temp_vol;
+			temp_vol_right = volume;
 	    }
 	  else
 	  	{
@@ -193,46 +206,61 @@ void njw1194_vol_ctrl(Channel_TYPE *chunnel,u8 volume)
 		   	{
                if(temp_vol>vol_adjust_by_balance)
                	{
-                  chunnel->vol_data->vol_right = temp_vol - vol_adjust_by_balance;
+                  temp_vol_right = volume - vol_adjust_by_balance;
 			    }
 			   else
 			   	{
-                  chunnel->vol_data->vol_right = VOLUME_MUTE_VAL;
+                  temp_vol_right = VOLUME_MUTE_VAL;
 			    }
 		    }
 		   else
 		   	{
-                 chunnel->vol_data->vol_right = VOLUME_MUTE_VAL;
+                 temp_vol_right = VOLUME_MUTE_VAL;
 		     }
+		   temp_vol_left = volume;
 	    }
    	}
-   temp_vol_left = VOLUME_MAX_VAL-chunnel->vol_data->vol_left;
-   temp_vol_right = VOLUME_MAX_VAL-chunnel->vol_data->vol_right;
+   if(volume!=0)
+   	{
+      temp_vol_left = (VOLUME_MAX_VAL-(temp_vol_left*2))+1;
+      temp_vol_right = (VOLUME_MAX_VAL-(temp_vol_right*2))+1;
+   	}
+   else
+   	{
+      temp_vol_left=VOLUME_MAX_VAL-VOLUME_MUTE_VAL;
+	  temp_vol_right=VOLUME_MAX_VAL-VOLUME_MUTE_VAL;	  
+     }
 
    njw1194_vol_ctrl_left(temp_vol_left,  chunnel->channel);
    njw1194_vol_ctrl_right(temp_vol_right,chunnel->channel);  
    
-   #if 0
-   switch(chunnel->channel)
-   	{
-   	  case CHANNEL_A:
-         njw1194_vol_ctrl_left(temp_vol_left,NJW1194_CHIP_A);
-		 njw1194_vol_ctrl_right(temp_vol_right,NJW1194_CHIP_A);
-		 break;
-   	  case CHANNEL_B:
-         njw1194_vol_ctrl_left(temp_vol_left,NJW1194_CHIP_B);
-		 njw1194_vol_ctrl_right(temp_vol_right,NJW1194_CHIP_B);
-		 break;		
-   	  case CHANNEL_C:
-         njw1194_vol_ctrl_left(temp_vol_left,NJW1194_CHIP_C);
-		 njw1194_vol_ctrl_right(temp_vol_right,NJW1194_CHIP_C);
-		 break;	
-   	  case CHANNEL_D:
-         njw1194_vol_ctrl_left(temp_vol_left,NJW1194_CHIP_D);
-		 njw1194_vol_ctrl_right(temp_vol_right,NJW1194_CHIP_D);
-		 break;		 
-   	}
-   #endif
+}
+void njw1194_vol_ctrl_l(Channel_TYPE *chunnel,u8 volume)
+{
+    u8 temp;
+
+    if(chunnel == NULL) return;
+	
+	if(IS_VOLUME(volume)) return;
+	
+    chunnel->vol_data->vol_left=volume;
+
+	temp = (chunnel->vol_data->vol_left)*2;
+
+	njw1194_vol_ctrl_left(temp,  chunnel->channel);
+}
+void njw1194_vol_ctrl_r(Channel_TYPE *chunnel,u8 volume)
+{
+    u8 temp;
+	if(chunnel == NULL) return;
+	
+	if(IS_VOLUME(volume)) return;
+	
+    chunnel->vol_data->vol_right=volume;
+	
+	temp = (chunnel->vol_data->vol_right)*2;
+
+	njw1194_vol_ctrl_left(temp,  chunnel->channel);
 }
 /*
   njw1194 balance control
@@ -241,23 +269,28 @@ void njw1194_balance_ctrl(Channel_TYPE *chunnel,u8 dir)
 {
    u8 temp_vol;
 
-   switch(dir)
+   if(chunnel == NULL) return;
+
+   /*only when LCH==RCH*/
+   if(chunnel->vol_data->vol_left == chunnel->vol_data->vol_right)
    	{
-       case DIR_UP:
-	   	if(chunnel->vol_data->balance==BALANCE_MAX) return;
-          (chunnel->vol_data->balance)++;
-	   	break;
-	   case DIR_DOWN:
-	   	if(chunnel->vol_data->balance==BALANCE_MIN) return;
-	   	(chunnel->vol_data->balance)--;
-	   	break;
-	   default:
-	   	return;
-    }
+       switch(dir)
+   	    {
+          case DIR_UP:
+	   	      if(chunnel->vol_data->balance==BALANCE_MAX) return;
+                 (chunnel->vol_data->balance)++;
+	     	break;
+	      case DIR_DOWN:
+	   	      if(chunnel->vol_data->balance==BALANCE_MIN) return;
+	   	         (chunnel->vol_data->balance)--;
+	   	    break;
+	      default:
+	   	       return;
+        }
    	
-  // chunnel->vol_data->balance=balance_vol;           //update the balance value
-   temp_vol = chunnel->vol_data->vol;
-   njw1194_vol_ctrl(chunnel,temp_vol);               //set the volume
+       temp_vol = chunnel->vol_data->vol;
+       njw1194_vol_ctrl(chunnel,temp_vol);               //set the volume
+   	}
 }
 /*
   treble 
@@ -266,6 +299,8 @@ void njw1194_treble_ctrl(Channel_TYPE *chunnel,u8 dir)
 {
    u8 temp_data; //BIT7--TC_B BIT6~3 treb_value BIT2--TONE SWITCH
    u8 temp_tone_sw;
+   if(chunnel == NULL) return;
+   
    switch(dir)
    	{
        case DIR_UP:
@@ -312,6 +347,8 @@ void njw1194_treble_ctrl(Channel_TYPE *chunnel,u8 dir)
 void njw1194_bass_ctrl(Channel_TYPE *chunnel,u8 dir)
 {
      u8 temp_bass;
+	 if(chunnel == NULL) return;
+	 
      temp_bass=chunnel->vol_data->bass_level;
 	 
      switch(dir)
@@ -336,4 +373,77 @@ void njw1194_bass_ctrl(Channel_TYPE *chunnel,u8 dir)
 	 temp_bass = temp_bass << 3;
 
 	 njw1194_bass_adjust(temp_bass, chunnel->channel);
+}
+
+void volume_ctrl(Channel_TYPE *chunnel,u8 left_or_right,u8 direct,u8 set_volume)
+{
+   u8 temp_val=0;
+   if(chunnel == NULL) return;
+   switch(left_or_right)
+   	{
+      case VOL_LEFT:
+	  		{
+			  temp_val=chunnel->vol_data->vol_left;	
+              switch(direct)
+              	{
+                   case DIR_UP:
+				   	njw1194_vol_ctrl_l(chunnel,temp_val++);
+				   	break;
+				   case DIR_DOWN:
+				   	njw1194_vol_ctrl_l(chunnel,temp_val--);
+				    break;
+				   default:
+				   	njw1194_vol_ctrl_l(chunnel,set_volume);
+				   	break;
+			    }
+	        }
+	  	break;
+	  case VOL_RIGHT:
+	  		{
+		      temp_val=chunnel->vol_data->vol_right;
+			  switch(direct)
+				{
+                  case DIR_UP:
+				  	njw1194_vol_ctrl_r(chunnel,temp_val++);
+				 	break;
+				  case DIR_DOWN:
+				  	njw1194_vol_ctrl_r(chunnel,temp_val--);
+				 	break;
+				  default:
+				 	njw1194_vol_ctrl_r(chunnel,set_volume);
+				 	break;
+			  	}
+	        }
+	  	break;
+	  case VOL_ALL:
+	  	 	{
+			  temp_val=chunnel->vol_data->vol;
+              switch(direct)
+              	{
+                  case DIR_UP:
+				  	njw1194_vol_ctrl(chunnel,temp_val++);
+				  	break;
+				  case DIR_DOWN:
+				  	njw1194_vol_ctrl(chunnel,temp_val--);
+				  	break;
+				  default:
+				  	njw1194_vol_ctrl(chunnel,set_volume);
+				  	break;
+			    }
+	        }
+	  	break;
+    }
+}
+void volume_mute_ctrl(Channel_TYPE *chunnel,u8 stat)
+{
+    if(chunnel == NULL) return;
+    if(stat == MUTE_ON)
+    	{
+          njw1194_input_channel_sel(INPUT_MUTE,chunnel->chip_id);    //select the mute channel
+    	}
+	else if(stat == MUTE_OFF)
+		{
+          njw1194_input_channel_sel(INPUT_A, chunnel->chip_id);      //select the input channel A
+	    }
+    chunnel->mute_status=stat;
 }

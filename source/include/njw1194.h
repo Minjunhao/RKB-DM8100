@@ -1,6 +1,10 @@
 #ifndef _NJW1194 
 #define _NJW1194
 
+#define VOL_ALL                             0
+#define VOL_LEFT                            1
+#define VOL_RIGHT                           2
+
 #define NJW1194_HIGH                        1
 #define NJW1194_LOW                         0
 
@@ -26,8 +30,13 @@
 #define NJW1194_CHIP_C                      0x02
 #define NJW1194_CHIP_D                      0x03
 
+#define INPUT_MUTE                          0x00
+#define INPUT_A                             0x04
+
 void njw1194_treble_ctrl(Channel_TYPE *chunnel,u8 dir);
 void njw1194_bass_ctrl(Channel_TYPE *chunnel,u8 dir);
 void njw1194_balance_ctrl(Channel_TYPE *chunnel,u8 dir);
 void njw1194_vol_ctrl(Channel_TYPE *chunnel,u8 volume);
+void volume_ctrl(Channel_TYPE *chunnel,u8 left_or_right,u8 direct,u8 set_volume);
+void volume_mute_ctrl(Channel_TYPE *chunnel,u8 stat);
 #endif //_NJW1194
