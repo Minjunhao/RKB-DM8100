@@ -2,13 +2,14 @@
 #define _PROC_FUNC
 #define IS_CHANNEL(x)     (x<=4)?0:(1)
 #define IS_NULL(x)        ((x)==NULL)? 1:0
-#define CONSTRUCT_TABLE_SIZE 33
+#define CONSTRUCT_TABLE_SIZE 54
 
 #define CHANNEL_A   0
 #define CHANNEL_B   1
 #define CHANNEL_C   2
 #define CHANNEL_D   3
 #define ALL_CHANNEL 4
+#define ENTIRE_MODE ALL_CHANNEL
 
 #define MUTE_CH_A   0
 #define MUTE_CH_B   1
@@ -19,10 +20,11 @@
 
 #define INPUT_MODE_ANALOG   0
 #define INPUT_MODE_DIGITAL  1
-#define INPUT_MODE_AUTO     3
+#define INPUT_MODE_AUTO     2
 
 extern u8  mode_display_update;
 extern u8  volume_send_delay_time;
+extern u8  adc_mode;
 
 
 typedef struct ak4117_chip {
@@ -66,10 +68,12 @@ typedef struct channel {
   void (*p_vol_control)(struct channel *,unsigned char,unsigned char,unsigned char);
   void (*p_vol_ctrl_l)(struct channel*, unsigned char);
   void (*p_vol_ctrl_r)(struct channel*, unsigned char);
-  void (*p_bass_control)(struct channel *, unsigned char);
-  void (*p_treb_control)(struct channel *, unsigned char);
-  void (*p_balance_contrl)(struct channel *,unsigned char);
+  void (*p_bass_control)(struct channel *, unsigned char,unsigned char);
+  void (*p_treb_control)(struct channel *, unsigned char,unsigned char);
+  void (*p_balance_contrl)(struct channel *,unsigned char,unsigned char);
   void (*p_mute_ctrl)(struct channel *,unsigned char);
+  void (*p_tone_control)(struct channel *,unsigned char);
+  void (*p_eeprom_write)(unsigned char,unsigned char);
 } Channel_TYPE;
 
 
@@ -128,4 +132,7 @@ void mode_mute_on(u8 chunnel);
 void RKB_channel_initial(void);
 void mode_amp_protection_check(void);
 void mode_ak4117_check(void);
+void mode_status_initial(void);
+void mode_input_check(void);
+void ethernet_backup_default(void);
 #endif

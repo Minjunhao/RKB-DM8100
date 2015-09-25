@@ -49,7 +49,7 @@
 #define IFNAME0 's'
 #define IFNAME1 't'
 
-
+extern u8 mac_address[6];
 /* Ethernet Rx & Tx DMA Descriptors */
 extern ETH_DMADESCTypeDef  DMARxDscrTab[ETH_RXBUFNB], DMATxDscrTab[ETH_TXBUFNB];
 
@@ -93,7 +93,7 @@ static void low_level_init(struct netif *netif)
   netif->hwaddr[4] =  MAC_ADDR4;
   netif->hwaddr[5] =  MAC_ADDR5;
   #else
-#if 0
+#if 1
   netif->hwaddr[0] =  mac_address[0];
   netif->hwaddr[1] =  mac_address[1];
   netif->hwaddr[2] =  mac_address[2];

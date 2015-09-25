@@ -280,6 +280,9 @@ DESCRIPTION     :
 
 #define p_i2c_scl(x)            ( (x==1)? GPIO_SetBits(IIC_PORT, IIC_SCL) : GPIO_ResetBits(IIC_PORT, IIC_SCL) );
 #define p_i2c_sda(x)            ( (x==1)? GPIO_SetBits(IIC_PORT, IIC_SDA) : GPIO_ResetBits(IIC_PORT, IIC_SDA) );
+
+#define PHY_NRESET(x)           ( (x==1)? GPIO_SetBits(PORTF_PORT, ETH_RESET) : GPIO_ResetBits(PORTF_PORT, ETH_RESET) );
+#define PHY_POWER_EN(x)         ( (x==1)? GPIO_SetBits(PORTF_PORT, ETH_PWR_EN) : GPIO_ResetBits(PORTF_PORT, ETH_PWR_EN) );
 #endif
 
 /* end of file */

@@ -27,6 +27,10 @@
 #include "signal_sense.h"
 #include "power_led.h"
 #include "ak4114.h"
+#ifdef _ETHERNET
+#include "netconf.h"
+#include "httpserver.h"
+#endif
 
 #define MAX_TEMP        100
 #define IS_TEMP(x)  ((x)<100)? 0:1
@@ -47,13 +51,21 @@ void power_status_initial(void)
 }
 void power_on(void)
 {
-   power_status.pwr_status = MAIN_POWER_ON;   //SMPS POWER
+   power_status.pwr_status = MAIN_POWER_INITIAL;   //SMPS POWER
    Standby(power_status.pwr_status);
+   //Standby(1);
+}
+void power_stable(void)
+{
+   power_status.pwr_status = MAIN_POWER_ON;
+   power_status.flag = FLAG_POWER_STATUS;
 }
 void power_off(void)
 {
    power_status.pwr_status = MAIN_POWER_OFF;
-   Standby(power_status.pwr_status);  
+   power_status.flag = FLAG_POWER_STATUS;
+   if(power_status.power_mode != POWER_MODE_SS_QUICK)
+      Standby(power_status.pwr_status);  
 }
 /*
    turn the SMPS power on
@@ -118,8 +130,8 @@ void mode_power_on(void)
 	   	 break;
     }
 
-   
-   DelayMs(200);
+   task_initialize_time=TIME20MSTO2000MS;
+   DelayMs(800);
       
    pwr_led_on();
    //fan status initialize
@@ -127,29 +139,37 @@ void mode_power_on(void)
    //amp status initialize
    amp_status_initial();
    //SMPS Power on
-   SMPS_On();
+   //SMPS_On();
+    #ifdef _ETHERNET
+   ip_control_init();
+   ethernet_configuration();
+   #endif	
+   
+   ethernet_dma_reset();
    //amp power on
    AMP_On();
+   
 
-   reply_mode_power_status();
+   //reply_mode_power_status();
 }
 void mode_power_off(void)
 {
+
+   
    switch(power_status.power_mode)
    	{
        case POWER_MODE_12V_TRIG:
 	   case POWER_MODE_NORMAL:
 	   case POWER_MODE_SS_NORMAL:
-	      power_off();
+	      //power_off();
 		  break;
 	   case POWER_MODE_SS_QUICK:
+	   	  AMP_Off();
+	   	  EthernetStandy();
 	   	  power_off();
 		  break;
     }
 
-
-   SMPS_Off();
-   AMP_Off();
 }
 
 void set_amp_shutdown_temp(u8 temp)

@@ -106,13 +106,13 @@ void njw1112_local_speaker_ctrl(Channel_TYPE *chunnel,u8 selector)
 {
    //chip_addr=0x0a
    u8 channel_stat=chunnel->local_speaker_src;
-   if(selector == channel_stat) return;
+   //if(selector == channel_stat) return;
 
+   if(selector>INPUT_A8_B8) return;
    switch(chunnel->channel)
    	{
        case CHANNEL_A:
-	   	njw1112_register_write(selector,OUTPUT_A_ADDR | CHIP_ADDR_LOW);
-		
+	   	njw1112_register_write(selector,OUTPUT_A_ADDR | CHIP_ADDR_LOW);	
 	   	break;
 	   case CHANNEL_B:
 	   	njw1112_register_write(selector,OUTPUT_B_ADDR | CHIP_ADDR_LOW);

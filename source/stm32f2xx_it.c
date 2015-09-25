@@ -184,7 +184,7 @@ void EXTI15_10_IRQHandler(void)
     Eth_Link_ITHandler(LAN8720_PHY_ADDRESS);
     if(EthInitStatus!=0 && EthInitStatus!=6) 
     {
-      EthInitStatus=7;
+      //EthInitStatus=7;
     }
 #endif
     /* Clear interrupt pending bit */

@@ -1847,9 +1847,6 @@
   </group>
   <group>
     <name>LWIP</name>
-    <excluded>
-      <configuration>Debug</configuration>
-    </excluded>
     <group>
       <name>Api</name>
       <file>
@@ -2145,10 +2142,16 @@
       <name>$PROJ_DIR$\..\source\fan_ctrl.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\Ethernet\src\httpserver.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\source\i2c.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\source\main.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Ethernet\src\netconf.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\source\njw1112.c</name>

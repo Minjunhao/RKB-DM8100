@@ -13,6 +13,7 @@ DESCRIPTION     :
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
+extern __IO uint32_t  EthInitStatus;
 // for capture compare interrupt
 //extern vu16 CCR1_Val;
 //extern vu16 CCR2_Val;
@@ -43,6 +44,12 @@ void SetConfigUART2n3ToTelechipsReciva(unsigned char on);
 void ADC_Configuration_PP(unsigned char type);					//20131024
 void GPIO_Configuration_PP(unsigned char type);					//20131024
 void GPIO_Configuration_MP2(unsigned char type);				//20140523
+
+void Eth_Link_ITHandler(uint16_t PHYAddress);
+void Eth_Link_EXTIConfig(void);
+void ETH_GPIO_Config(void);
+void ETH_MACDMA_Config(void);
+uint32_t Eth_Link_PHYITConfig(uint16_t PHYAddress);
 #endif /* __MAIN_H__ */
 
 /* end of file */

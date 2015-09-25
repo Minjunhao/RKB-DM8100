@@ -34,8 +34,8 @@ vu16 current_ADC_Val[4];
 
 unsigned char UpDownRepeatCount;
 
-unsigned char key_target[8];
-unsigned char current_key[8];
+unsigned char key_target[4];
+unsigned char current_key[4];
 
 /*----------------------------------------------------------------------------*/
 //#define TEMPERATURE_100STEP_ENABLE		//temperature display table : [0..99/1STEP]
@@ -905,9 +905,25 @@ void temperature_read(void)
 */
 void mode_temperature_check(void)
 {
-	fan_status.smps_temperature = ((current_key[0]>=current_key[1])? (current_key[0]):(current_key[1]));
+    u8 temp;
 
-    fan_status.amp_temperature = ((current_key[2]>=current_key[3])?(current_key[2]):(current_key[3]));
+	temp=((current_key[0]>=current_key[1])? (current_key[0]):(current_key[1]));
+	fan_status.flag=F_TEMP_CHANGE;
+	if(fan_status.smps_temperature != temp)
+		{
+          fan_status.flag=F_SMPS_TEMP;            //0x80--smps temperature change
+          fan_status.smps_temperature=temp;
+          
+	    }
+	temp=((current_key[2]>=current_key[3])?(current_key[2]):(current_key[3]));
+	if(fan_status.amp_temperature != temp)
+		{
+		  fan_status.flag=F_AMP_TEMP;
+          fan_status.amp_temperature=temp;
+	    }
+	//fan_status.smps_temperature = ((current_key[0]>=current_key[1])? (current_key[0]):(current_key[1]));
+
+    //fan_status.amp_temperature = ((current_key[2]>=current_key[3])?(current_key[2]):(current_key[3]));
 }
 /* end of file */
 /******************* (C) COPYRIGHT 2008 Rotel Technology Global **************/

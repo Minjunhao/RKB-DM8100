@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=1520096362
+Checksum=-726882887
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -36,9 +36,28 @@ ActionState=1
 [Trace1]
 Enabled=0
 ShowSource=1
+[array_types]
+Fmt0=u8[20]	3	0
+Fmt1=uint8_t[4]	3	0
+Fmt2=unsigned char[8]	3	0
 [watch_formats]
-Fmt0={W}0:set_volume	3	0
-Fmt1={W}0:volume	3	0
+Fmt0={W}0:array[0]	3	0
+Fmt1={W}0:set_volume	3	0
+Fmt2={W}0:test_data	3	0
+Fmt3={W}0:volume	3	0
+[Disassemble mode]
+mode=0
+[Breakpoints2]
+Bp0=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\command_key.c}.373.2" 0 0 1 "" 0 "" 0
+Bp1=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\ak4114.c}.782.4" 0 0 1 "" 0 "" 0
+Bp2=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\ak4114.c}.648.2" 0 0 1 "" 0 "" 0
+Bp3=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\command_key.c}.895.8" 0 0 1 "" 0 "" 0
+Bp4=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\eeprom.c}.449.1" 0 0 1 "" 0 "" 0
+Bp5=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\eeprom.c}.491.1" 0 0 1 "" 0 "" 0
+Bp6=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\eeprom.c}.1013.1" 0 0 1 "" 0 "" 0
+Bp7=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\eeprom.c}.1012.6" 0 0 1 "" 0 "" 0
+Bp8=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\signal_sense.c}.50.2" 0 0 1 "" 0 "" 0
+Count=9
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
@@ -46,6 +65,9 @@ Category=_ 0
 [TermIOLog]
 LoggingEnabled=_ 0
 LogFile=_ ""
+[Aliases]
+Count=0
+SuppressDialog=0
 [CallStackLog]
 Enabled=0
 [DriverProfiling]
@@ -54,21 +76,3 @@ Mode=0
 Graph=0
 Symbiont=0
 Exclusions=
-[Disassemble mode]
-mode=0
-[Breakpoints2]
-Bp0=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\command_key.c}.353.9" 0 0 1 "" 0 "" 0
-Bp1=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\command_key.c}.582.4" 0 0 1 "" 0 "" 0
-Bp2=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\ak4114.c}.782.4" 0 0 1 "" 0 "" 0
-Bp3=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\ak4114.c}.648.2" 0 0 1 "" 0 "" 0
-Bp4=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\main.c}.117.8" 0 0 1 "" 0 "" 0
-Bp5=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\command_key.c}.321.11" 0 0 1 "" 0 "" 0
-Bp6=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\command_key.c}.371.5" 0 0 1 "" 0 "" 0
-Bp7=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\command_key.c}.361.4" 0 0 1 "" 0 "" 0
-Bp8=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\command_key.c}.428.4" 0 0 1 "" 0 "" 0
-Bp9=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\command_key.c}.431.5" 0 0 1 "" 0 "" 0
-Bp10=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\command_key.c}.484.5" 0 0 1 "" 0 "" 0
-Count=11
-[Aliases]
-Count=0
-SuppressDialog=0

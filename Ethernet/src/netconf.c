@@ -29,7 +29,7 @@
 #include "netif/etharp.h"
 #include "lwip/dhcp.h"
 #include "ethernetif.h"
-#include "mmain.h"
+#include "main.h"
 #include "netconf.h"
 #include "timer.h"
 #include "stm32f2x7_eth.h"
@@ -42,6 +42,7 @@
 #include "lwip/ip_frag.h"
 #endif
 #include "httpserver.h"
+#include "power_led.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,16 +57,16 @@
 struct netif netif;
 //extern struct tcp_pcb *connected_pcb;
 extern struct tcp_pcb *listenning_pcb;
-uint32_t TCPTimer = 0;
-uint32_t ARPTimer = 0;
-uint32_t IPaddress = 0;
-uint32_t SubNetMask = 0;
-uint32_t GateWay    = 0;
-uint32_t DnsAddr    = 0;
+uint32_t TCP_timer = 0;
+uint32_t ARP_timer = 0;
+uint32_t ip_address = 0;
+uint32_t subnet_mask = 0;
+uint32_t gateway    = 0;
+uint32_t dns_addr    = 0;
 
 //#ifdef USE_DHCP
-uint32_t DHCPfineTimer = 0;
-uint32_t DHCPcoarseTimer = 0;
+uint32_t DHCP_fine_timer = 0;
+uint32_t DHCP_coarse_timer = 0;
 DHCP_State_TypeDef DHCP_state = DHCP_START;
 STATIC_STATE_TYPEDEF STATIC_state = STATIC_WAIT_ETH_CONFIG;
 uint8_t iptab[4];
@@ -82,15 +83,51 @@ uint32_t IGMP_timer=0;
 uint32_t IPREASBLY_timer=0;
 #endif
 
+u8 dhcp_ip_addr[4];
+u8 dhcp_subnet_mask[4];
+u8 dhcp_gateway_addr[4];
+u8 dhcp_dns[4];
+u8 mode_dhcp_enable=1;
+u8 mac_address[6]={0,0,0,0,0xff,0xff};
+
+u8 manual_ip_addr[4];
+u8 manual_subnet_mask[4];
+u8 manual_gateway_addr[4];
+u8 manual_dns[4];
+
+
 /* Private functions ---------------------------------------------------------*/
 void LwIP_DHCP_Process_Handle(void);
-
+/**
+  * @brief  ethernet process initial
+  * @param  None
+  * @retval None
+  */
+void ethernet_configuration(void)
+{
+    u8 i=0;
+	EthInitStatus=0;
+	if(mode_dhcp_enable==1){
+	   for(i=0;i<4;i++)
+		  {
+             dhcp_ip_addr[i]=0;
+			 dhcp_subnet_mask[i]=0;
+			 dhcp_gateway_addr[i]=0;
+			 dhcp_dns[i]=0;
+	      }
+		}
+	PHY_POWER_EN(0);   //must power down
+	PHY_initial_status=PHY_RESET;	
+	PHY_NRESET(0);
+    DHCP_state=DHCP_START;	
+	STATIC_state=STATIC_WAIT_ETH_CONFIG;	
+}
 /**
   * @brief  reinitializes the lwIP stack and the tcp/udp service
   * @param  None
   * @retval None
   */
-void Service_Restart(void)
+void service_restart(void)
 {
   DHCP_state = DHCP_START;
   
@@ -124,7 +161,7 @@ void LwIP_Init(void)
   /* Initializes the memory pools defined by MEMP_NUM_x.*/
   memp_init();
   
-  if(mode_dhcpEnable==1)
+  if(mode_dhcp_enable==1)
   	{
       ipaddr.addr = 0;
       netmask.addr = 0;
@@ -137,9 +174,9 @@ void LwIP_Init(void)
      IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1 , NETMASK_ADDR2, NETMASK_ADDR3);
      IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
 	 #endif
-     IP4_ADDR(&ipaddr, manual_ipAddress[0], manual_ipAddress[1], manual_ipAddress[2], manual_ipAddress[3]);
-     IP4_ADDR(&netmask, manual_subnetMask[0], manual_subnetMask[1] , manual_subnetMask[2], manual_subnetMask[3]);
-	 IP4_ADDR(&gw, manual_gatewayAddr[0], manual_gatewayAddr[1], manual_gatewayAddr[2], manual_gatewayAddr[3]);
+     IP4_ADDR(&ipaddr, manual_ip_addr[0], manual_ip_addr[1], manual_ip_addr[2], manual_ip_addr[3]);
+     IP4_ADDR(&netmask, manual_subnet_mask[0], manual_subnet_mask[1] , manual_subnet_mask[2], manual_subnet_mask[3]);
+	 IP4_ADDR(&gw, manual_gateway_addr[0], manual_gateway_addr[1], manual_gateway_addr[2], manual_gateway_addr[3]);
 	 IP4_ADDR(&static_dns,manual_dns[0],manual_dns[1],manual_dns[2],manual_dns[3]);
 	 STATIC_state=STATIC_IP_CONFIGURED;
   	}
@@ -199,27 +236,27 @@ void LwIP_Periodic_Handle(__IO uint32_t localtime)
   u8_t i=0;
 #if LWIP_TCP
   /* TCP periodic process every 250 ms */
-  if (localtime - TCPTimer >= TCP_TMR_INTERVAL)
+  if (localtime - TCP_timer >= TCP_TMR_INTERVAL)
   {
-    TCPTimer =  localtime;
+    TCP_timer =  localtime;
     tcp_tmr();
   }
 #endif
   
   /* ARP periodic process every 5s */
-  if ((localtime - ARPTimer) >= ARP_TMR_INTERVAL)
+  if ((localtime - ARP_timer) >= ARP_TMR_INTERVAL)
   {
-    ARPTimer =  localtime;
+    ARP_timer =  localtime;
     etharp_tmr();
   }
 
-//#ifdef USE_DHCP
-  if(mode_dhcpEnable==1)
+#ifdef USE_DHCP
+  if(mode_dhcp_enable==1)
   	{
   /* Fine DHCP periodic process every 500ms */
-  if (localtime - DHCPfineTimer >= DHCP_FINE_TIMER_MSECS)
+  if (localtime - DHCP_fine_timer >= DHCP_FINE_TIMER_MSECS)
   {
-    DHCPfineTimer =  localtime;
+    DHCP_fine_timer =  localtime;
     dhcp_fine_tmr();
     if ((DHCP_state != DHCP_ADDRESS_ASSIGNED)&&(DHCP_state != DHCP_TIMEOUT))
     {      
@@ -229,13 +266,13 @@ void LwIP_Periodic_Handle(__IO uint32_t localtime)
   }
 
   /* DHCP Coarse periodic process every 60s */
-  if (localtime - DHCPcoarseTimer >= DHCP_COARSE_TIMER_MSECS)
+  if (localtime - DHCP_coarse_timer >= DHCP_COARSE_TIMER_MSECS)
   {
-    DHCPcoarseTimer =  localtime;
+    DHCP_coarse_timer =  localtime;
     dhcp_coarse_tmr();
   }
   	}
-//#endif
+#endif
 #ifdef LWIP_DNS
   if(localtime-DNS_timer>DNS_TMR_INTERVAL)
     {
@@ -264,14 +301,9 @@ void LwIP_Periodic_Handle(__IO uint32_t localtime)
 }
 
 #ifdef _ETHERNET
-static u16 ethernet_main_time_out=0;
-void EthernetMain(void)
+void EthernetDmaInit(void)
 {
-   switch(EthInitStatus)
-   	{
-      case 0:
 	  	 ETH_GPIO_Config();
-		 Eth_Link_EXTIConfig();              //20150630
          /* Enable ETHERNET clock  */
          RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_ETH_MAC | RCC_AHB1Periph_ETH_MAC_Tx |
                         RCC_AHB1Periph_ETH_MAC_Rx, ENABLE);
@@ -280,8 +312,60 @@ void EthernetMain(void)
          ETH_DeInit();
          /* Software reset */
          ETH_SoftwareReset();
-		 
 		 EthInitStatus=1;
+	  	 while(ETH_GetSoftwareResetStatus() != SET)
+	  		{
+		    }
+              EthInitStatus=2;
+			  //VFD_Bk(1);
+			  //VFD_display("  Connecting...    ", 20, 1);
+			  //VFD_display("                   ", 20, 2);
+			  PHY_POWER_EN(1);
+              PHY_NRESET(1);
+              SMPS_nPowerOn(0);
+              DelayMs(2000);
+              //PHY_NRESET(1);        
+}
+
+static u16 ethernet_main_time_out=0;
+void ethernet_dma_reset(void)
+{
+    ETH_GPIO_Config();
+	//Eth_Link_EXTIConfig();              //20150630
+    /* Enable ETHERNET clock  */
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_ETH_MAC | RCC_AHB1Periph_ETH_MAC_Tx |
+                        RCC_AHB1Periph_ETH_MAC_Rx, ENABLE);         
+    /* Reset ETHERNET on AHB Bus */
+    ETH_DeInit();       
+    /* Software reset */
+    ETH_SoftwareReset();
+
+	while(ETH_GetSoftwareResetStatus() != SET){}
+
+    EthInitStatus=2;
+	//ethernet_main_time_out=0;
+    PHY_POWER_EN(1);
+	PHY_NRESET(1); 
+	SMPS_On();	
+    //DelayMs(2000);
+    //PHY_NRESET(1); 	
+}
+void EthernetMain(void)
+{
+   switch(EthInitStatus)
+   	{
+      case 0:
+	  	 ETH_GPIO_Config();
+		 //Eth_Link_EXTIConfig();              //20150630
+         /* Enable ETHERNET clock  */
+         RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_ETH_MAC | RCC_AHB1Periph_ETH_MAC_Tx |
+                        RCC_AHB1Periph_ETH_MAC_Rx, ENABLE);         
+         /* Reset ETHERNET on AHB Bus */
+         ETH_DeInit();       
+         /* Software reset */
+         ETH_SoftwareReset();
+	
+         EthInitStatus=1;
 	    break;
 	  case 1:
 	  	if(ETH_GetSoftwareResetStatus() == SET)
@@ -302,11 +386,12 @@ void EthernetMain(void)
 		ethernet_main_time_out++;
 		break;
 	  case 2:
+	  	PHY_NRESET(1);
 	  	ETH_MACDMA_Config();
 		break;
 	  case 3:   //set the interrupt
 	  	Eth_Link_PHYITConfig(LAN8720_PHY_ADDRESS);
-	    //Eth_Link_EXTIConfig();
+	    Eth_Link_EXTIConfig();
 		EthInitStatus=4;
 		break;
 	  case 4:
@@ -385,7 +470,7 @@ void EthernetRestartLwIP(void)
    CloseConnection(connected_pcb_upgrade);
    EXTI_DeInit();
    netif_remove(&netif);
-   Ethernet_Configuration();  
+   ethernet_configuration();  
 }
 #endif
 #ifdef USE_DHCP
@@ -396,35 +481,25 @@ void EthernetRestartLwIP(void)
   */
 void LwIP_DHCP_Process_Handle()
 {
-  //struct ip_addr ipaddr;
-  //struct ip_addr netmask;
-  //struct ip_addr gw;
-  //uint8_t iptab[4];
-  //uint8_t iptxt[20];
 
   switch (DHCP_state)
   {
     case DHCP_START:
     {
       dhcp_start(&netif);
-      IPaddress = 0;
+      ip_address= 0;
       DHCP_state = DHCP_WAIT_ADDRESS;
-#ifdef USE_LCD
-      LCD_DisplayStringLine(Line4, (uint8_t*)"     Looking for    ");
-      LCD_DisplayStringLine(Line5, (uint8_t*)"     DHCP server    ");
-      LCD_DisplayStringLine(Line6, (uint8_t*)"     please wait... ");
-#endif
     }
     break;
 
     case DHCP_WAIT_ADDRESS:
     {
       /* Read the new IP address */
-      IPaddress = netif.ip_addr.addr;
-	  SubNetMask = netif.netmask.addr;
-	  GateWay    = netif.gw.addr;
-      DnsAddr    = (netif.dhcp)->offered_dns_addr[0].addr;
-      if (IPaddress!=0) 
+      ip_address = netif.ip_addr.addr;
+	  subnet_mask = netif.netmask.addr;
+	  gateway    = netif.gw.addr;
+      dns_addr    = (netif.dhcp)->offered_dns_addr[0].addr;
+      if (ip_address!=0) 
       {
         DHCP_state = DHCP_ADDRESS_ASSIGNED;	
 
@@ -432,29 +507,29 @@ void LwIP_DHCP_Process_Handle()
         dhcp_stop(&netif);
         udp_server_init();
    
-        iptab[3] = (uint8_t)(IPaddress >> 24);
-        iptab[2] = (uint8_t)(IPaddress >> 16);
-        iptab[1] = (uint8_t)(IPaddress >> 8);
-        iptab[0] = (uint8_t)(IPaddress);
+        iptab[3] = (uint8_t)(ip_address >> 24);
+        iptab[2] = (uint8_t)(ip_address >> 16);
+        iptab[1] = (uint8_t)(ip_address >> 8);
+        iptab[0] = (uint8_t)(ip_address);
 
-		memcpy(dhcp_ipAddress,iptab,4);
+		memcpy(dhcp_ip_addr,iptab,4);
 		
         sprintf((char*)iptxt, "%d.%d.%d.%d", iptab[0], iptab[1], iptab[2], iptab[3]);       
 
-        dhcp_subnetMask[3] = (uint8_t)(SubNetMask >> 24);
-        dhcp_subnetMask[2] = (uint8_t)(SubNetMask >> 16);
-        dhcp_subnetMask[1] = (uint8_t)(SubNetMask >> 8);
-        dhcp_subnetMask[0] = (uint8_t)(SubNetMask);
+        dhcp_subnet_mask[3] = (uint8_t)(subnet_mask >> 24);
+        dhcp_subnet_mask[2] = (uint8_t)(subnet_mask >> 16);
+        dhcp_subnet_mask[1] = (uint8_t)(subnet_mask >> 8);
+        dhcp_subnet_mask[0] = (uint8_t)(subnet_mask);
 
-        dhcp_gatewayAddr[3] = (uint8_t)(GateWay >> 24);
-        dhcp_gatewayAddr[2] = (uint8_t)(GateWay >> 16);
-        dhcp_gatewayAddr[1] = (uint8_t)(GateWay >> 8);
-        dhcp_gatewayAddr[0] = (uint8_t)(GateWay);	
+        dhcp_gateway_addr[3] = (uint8_t)(gateway>> 24);
+        dhcp_gateway_addr[2] = (uint8_t)(gateway >> 16);
+        dhcp_gateway_addr[1] = (uint8_t)(gateway >> 8);
+        dhcp_gateway_addr[0] = (uint8_t)(gateway);	
 
-        dhcp_dns[3] = (uint8_t)(DnsAddr >> 24);
-        dhcp_dns[2] = (uint8_t)(DnsAddr >> 16);
-        dhcp_dns[1] = (uint8_t)(DnsAddr >> 8);
-        dhcp_dns[0] = (uint8_t)(DnsAddr);	
+        dhcp_dns[3] = (uint8_t)(dns_addr >> 24);
+        dhcp_dns[2] = (uint8_t)(dns_addr >> 16);
+        dhcp_dns[1] = (uint8_t)(dns_addr >> 8);
+        dhcp_dns[0] = (uint8_t)(dns_addr);	
       }
       else
       {

@@ -175,12 +175,15 @@ u8 ak4117_read_byte(void)
    	{
       ak4117_clk_ctrl(AK4117_BIT_HIGH);
 	  ak4117_delay(20);
+	  val=val<<1;
 	  if(AK4117_BIT_HIGH == (get_ak4117_do))
 	  	{
 	  	   val=val | 0x01;
 	  	}
+#if 0	  
       if(i<7)
         val=val<<1;
+#endif
 	  ak4117_clk_ctrl(AK4117_BIT_LOW);	  
     }
    ak4117_clk_ctrl(AK4117_BIT_LOW);

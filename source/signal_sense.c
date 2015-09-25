@@ -33,20 +33,20 @@ void amp_status_initial(void)
 {
     amp_status.check_timer = 0;
     amp_status.protect_status = AMP_PROTECT_ON;
-    amp_status.protect_func_on= PROTECT_FUNCTION_OFF;
+    amp_status.protect_func_on= PROTECT_FUNCTION_ON;
 }
 void amp_protection_on(void)
 {
     if(amp_status.protect_status == AMP_PROTECT_ON) return;
 
-	amp_status.protect_status=AMP_PROTECT_OFF;
+	amp_status.protect_status=AMP_PROTECT_ON;
 	AMP_Off();
 }
 void amp_protection_off(void)
 {
     if(amp_status.protect_status == AMP_PROTECT_OFF) return;
 
-	amp_status.protect_status=AMP_PROTECT_ON;
+	amp_status.protect_status=AMP_PROTECT_OFF;
 	AMP_On();
 }
 /*

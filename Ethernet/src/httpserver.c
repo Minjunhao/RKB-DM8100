@@ -40,7 +40,7 @@
 #include "lwip/dns.h"
 #endif
 #include "httpserver.h"
-#include "mmain.h"
+#include "main.h"
 #include "netconf.h"
 #include <string.h>
 #include <stdio.h>
@@ -59,7 +59,6 @@ u8_t data_buffer[1000];
 u16_t ethernet_data_head;
 u16_t ethernet_data_tail;
 static u32_t tcp_state_timer;
-//TCP_STATE tcp_state=TCP_CLOSED;
 u16_t tcp_port=0;
 struct message_state
 {
@@ -298,7 +297,7 @@ void ethernet_send_message(char *msg,u16_t len)
      //send data through TCP
  	 for(i=0;i<TCP_CLIENT_NUM;i++)
 	 	{
-	 	   if(first_to_be_process==TCP_CLIENT_NUM+1) first_to_be_process=0;  //if the postion of the processing is the end, back to the start
+	 	   if(first_to_be_process==TCP_CLIENT_NUM) first_to_be_process=0;  //if the postion of the processing is the end, back to the start
 		   if(p_tcp[first_to_be_process].pcb != NULL && p_tcp[first_to_be_process].pcb->state == ESTABLISHED){
 			  if (tcp_sndbuf(p_tcp[first_to_be_process].pcb) < p_tcp[first_to_be_process].left)
                  {

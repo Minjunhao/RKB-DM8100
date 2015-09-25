@@ -98,6 +98,47 @@ void ini_DisableInterrupt(void)
     ETH_DeInit();
 #endif
 }
+#ifdef _IWDG_ENABLE
+/*-----------------------------------------------------------------------------
+ Function Name  : IWDG_Configuration
+ Description    : Configures Vector Table base location.
+ Input          : None
+ Output         : None
+ Return         : None
+ Comments	 	: ..
+-----------------------------------------------------------------------------*/
+void IWDG_Configuration(void)
+{
+#ifdef _IWDG_ENABLE
+	RCC_LSICmd(ENABLE);
+	while (RCC_GetFlagStatus(RCC_FLAG_LSIRDY) == RESET) {};
+	// Enable write access to IWDG_PR and IWDG_RLR registers
+	IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
+	// IWDG Prescaler value :
+	//	IWDG_Prescaler_4
+	//	IWDG_Prescaler_8
+	//	IWDG_Prescaler_16
+	//	IWDG_Prescaler_32
+	//	IWDG_Prescaler_64
+	//	IWDG_Prescaler_128
+	//	IWDG_Prescaler_256
+	// IWDG counter clock : LSI(32KHz)/32 = 1.0KHz (1.0msec)
+	// IWDG counter clock : LSI(32KHz)/64 = 500Hz (2.0msec)
+	IWDG_SetPrescaler(IWDG_Prescaler_32);
+	// Set counter reload value(0~0x0FFF) to obtain ?sec IWDG Timeout
+	// = 2sec/(LSI/32)
+	IWDG_SetReload(2000);		//(Max 4095)
+	// Reload IWDG counter
+	//(0xAAAA)
+	IWDG_ReloadCounter();
+	// Enable IWDG(the LSI oscillator will be enabled by hardware)
+	//(0xCCCC)
+	IWDG_Enable();
+	// for debugging stop IWDG
+	//DBGMCU_APB1PeriphConfig(DBGMCU_IWDG_STOP,ENABLE);
+#endif
+}
+#endif //IWDG
 /*-----------------------------------------------------------------------------
  Function Name  : ini_InitMcu
  Description    : Initialize the MCU
@@ -123,6 +164,7 @@ void ini_InitMcu(void)
 	SYSTICK_Configuration();
 
 	NVIC_Configuration();
+
 #else
 	//--------------------------------------------
 	//define : pin53 : PC12 : ( input ) : for PP/MP and WS1/2 option
@@ -1251,7 +1293,6 @@ void GPIO_Configuration(unsigned char type)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-
 	if(type != 0)
 		{
 		   /* PORT A */
@@ -1275,7 +1316,7 @@ void GPIO_Configuration(unsigned char type)
 		   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 		   GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_10;
 
-		   GPIO_Init(GPIOA,&GPIO_InitStructure);
+		   GPIO_Init(GPIOA,&GPIO_InitStructure);       
 		}
    else
 		{
@@ -1302,7 +1343,7 @@ void GPIO_Configuration(unsigned char type)
            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
 		   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
 		   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-		   GPIO_Init(GPIOB,&GPIO_InitStructure);		   
+		   GPIO_Init(GPIOB,&GPIO_InitStructure);	
    	}
    else
    	{
@@ -1328,7 +1369,14 @@ void GPIO_Configuration(unsigned char type)
 		   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 		   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 		   GPIO_Init(GPIOC,&GPIO_InitStructure);
-
+#if 0
+		   /*AMP_ON(PC8) SMPS_ON(PC9)*/
+		   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
+		   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+		   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+		   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+		   GPIO_Init(GPIOC,&GPIO_InitStructure);
+#endif		   
            /*USART4_TX(PC10)*/
 		   GPIO_PinAFConfig(GPIOC,GPIO_PinSource10,GPIO_AF_UART4);
 		   /*USART4_RX(PC11)*/
@@ -1361,7 +1409,7 @@ void GPIO_Configuration(unsigned char type)
 		   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 		   GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_2;
 
-		   GPIO_Init(GPIOD,&GPIO_InitStructure);	
+		   GPIO_Init(GPIOD,&GPIO_InitStructure);
    	}
    else
    	{
@@ -2194,14 +2242,14 @@ void ADC_Configuration(unsigned char type)
 
 	   ADC_Init(ADC3,&ADC_InitStructure);
 
-	   ADC_RegularChannelConfig(ADC3, ADC_Channel_4, 1, ADC_SampleTime_56Cycles);    //NTC.SMPS2
+	   ADC_RegularChannelConfig(ADC3, ADC_Channel_14, 1, ADC_SampleTime_56Cycles);    //NTC.SMPS1
 	   //ADC_RegularChannelConfig(ADC3, ADC_Channel_5, 2, ADC_SampleTime_56Cycles);
 	   //ADC_RegularChannelConfig(ADC3, ADC_Channel_6, 3, ADC_SampleTime_56Cycles);
 	   //ADC_RegularChannelConfig(ADC3, ADC_Channel_7, 4, ADC_SampleTime_56Cycles);
 	   //ADC_RegularChannelConfig(ADC3, ADC_Channel_8, 5, ADC_SampleTime_56Cycles);
-	   ADC_RegularChannelConfig(ADC3, ADC_Channel_9, 2, ADC_SampleTime_56Cycles);    //NTC.SMPS1
-	   ADC_RegularChannelConfig(ADC3, ADC_Channel_14, 3, ADC_SampleTime_56Cycles);   //NTC.AMP2
-	   ADC_RegularChannelConfig(ADC3, ADC_Channel_15, 4, ADC_SampleTime_56Cycles);   //NTC.AMP1
+	   ADC_RegularChannelConfig(ADC3, ADC_Channel_9, 2, ADC_SampleTime_56Cycles);    //NTC.SMPS2
+	   ADC_RegularChannelConfig(ADC3, ADC_Channel_4, 3, ADC_SampleTime_56Cycles);   //NTC.AMP1
+	   ADC_RegularChannelConfig(ADC3, ADC_Channel_15, 4, ADC_SampleTime_56Cycles);   //NTC.AMP2
 
 	   ADC_DMARequestAfterLastTransferCmd(ADC3, ENABLE);
 
@@ -2466,6 +2514,237 @@ void SYSTICK_Configuration(void)
 #endif
 
 }
+
+#ifdef _ETHERNET
+/*-----------------------------------------------------------------------------
+ Function Name  : Ethernet GPIO Configuration
+ Description    : Configures the ETHERNET.
+ Input          : None
+ Output         : None
+ Return         : None
+ Comments	 	: ..
+-----------------------------------------------------------------------------*/
+void ETH_GPIO_Config(void)
+{
+
+   /* Ethernet pins configuration ************************************************/
+   /*
+        //ETH_INT  ----------------------------> PB14
+        ETH_RMII_TXD0 -----------------------> PB12
+        ETH_RMII_TXD1 -----------------------> PB13
+        ETH_RMII_RXD0 -----------------------> PC4
+        ETH_RMII_RXD1 -----------------------> PC5
+        ETH_MDIO ----------------------------> PA2
+        ETH_RMII_REF_CLK --------------------> PA1
+        ETH_MII_CRS -------------------------> PA0
+        ETH_MII_TX_CLK ----------------------> PC3
+        ETH_MDC -----------------------------> PC1
+        ETH_RMII_CRS_DV ---------------------> PA7
+        //ETH_RESET----------------------------> PF15
+        //ETH_PWR_EN --------------------------> PG0
+        ETH_RMII_TX_EN ----------------------> PB11
+        ETH_MII_RX_ER -----------------------> PB10
+                                                  */    
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    //interrupt
+    GPIO_InitStructure.GPIO_Pin  =GPIO_Pin_14;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+    
+    //RESET(PF11) Power enable/disable(PF12)
+    GPIO_InitStructure.GPIO_Pin  =GPIO_Pin_11 | GPIO_Pin_12;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_Init(GPIOF, &GPIO_InitStructure);
+	
+    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource1, GPIO_AF_ETH);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_ETH);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource7, GPIO_AF_ETH);
+
+	GPIO_InitStructure.GPIO_Pin =GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_ETH);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource11, GPIO_AF_ETH);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource12, GPIO_AF_ETH);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, GPIO_AF_ETH);
+
+	GPIO_InitStructure.GPIO_Pin =GPIO_Pin_1 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource1, GPIO_AF_ETH);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource3, GPIO_AF_ETH);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource4, GPIO_AF_ETH);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource5, GPIO_AF_ETH);
+
+
+	SYSCFG_ETH_MediaInterfaceConfig(SYSCFG_ETH_MediaInterface_RMII);
+ 
+}
+
+
+/**
+  * @brief  EXTI configuration for Ethernet link status.
+  * @param PHYAddress: external PHY address  
+  * @retval None
+  */
+void Eth_Link_EXTIConfig(void)
+{
+  GPIO_InitTypeDef GPIO_InitStructure;
+  EXTI_InitTypeDef EXTI_InitStructure;
+  NVIC_InitTypeDef NVIC_InitStructure;
+
+  /* Enable the INT (PB14) Clock */
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
+  /* Configure INT pin as input */
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+  /* Connect EXTI Line to INT Pin */
+  SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource14);
+
+  /* Configure EXTI line */
+  EXTI_InitStructure.EXTI_Line = EXTI_Line14;
+  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;  
+  EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+  EXTI_Init(&EXTI_InitStructure);
+
+
+  /* Enable and set the EXTI interrupt to the highest priority */
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  
+  NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+
+}
+
+
+/**
+  * @brief  This function handles Ethernet link status.
+  * @param  None
+  * @retval None
+  */
+void Eth_Link_ITHandler(uint16_t PHYAddress)
+{
+  /* Check whether the link interrupt has occurred or not */
+  if(((ETH_ReadPHYRegister(PHYAddress, PHY_MISR)) & PHY_LINK_STATUS) != 0)
+  {
+    EthLinkStatus = ~EthLinkStatus;
+
+#ifdef USE_LCD
+    /* Set the LCD Text Color */
+    LCD_SetTextColor(Red);
+
+    if(EthLinkStatus != 0)
+    {
+      /* Display message on the LCD */
+      LCD_DisplayStringLine(Line5, (uint8_t*)"  Network Cable is  ");
+      LCD_DisplayStringLine(Line6, (uint8_t*)"     unplugged      ");
+    }
+    else
+    {
+      /* Display message on the LCD */
+      LCD_DisplayStringLine(Line5, (uint8_t*)"  Network Cable is  ");
+      LCD_DisplayStringLine(Line6, (uint8_t*)"   now connected    ");
+    }
+#endif
+  }
+}
+/**
+  * @brief  Configures the Ethernet Interface
+  * @param  None
+  * @retval None
+  */
+void ETH_MACDMA_Config(void)
+{
+  ETH_InitTypeDef ETH_InitStructure;
+  
+  /* ETHERNET Configuration --------------------------------------------------*/
+  /* Call ETH_StructInit if you don't like to configure all ETH_InitStructure parameter */
+  ETH_StructInit(&ETH_InitStructure);
+
+  /* Fill ETH_InitStructure parametrs */
+  /*------------------------   MAC   -----------------------------------*/
+  ETH_InitStructure.ETH_AutoNegotiation = ETH_AutoNegotiation_Enable;
+  //ETH_InitStructure.ETH_AutoNegotiation = ETH_AutoNegotiation_Disable; 
+  //  ETH_InitStructure.ETH_Speed = ETH_Speed_10M;
+  //  ETH_InitStructure.ETH_Mode = ETH_Mode_FullDuplex;   
+
+  ETH_InitStructure.ETH_LoopbackMode = ETH_LoopbackMode_Disable;
+  ETH_InitStructure.ETH_RetryTransmission = ETH_RetryTransmission_Disable;
+  ETH_InitStructure.ETH_AutomaticPadCRCStrip = ETH_AutomaticPadCRCStrip_Disable;
+  ETH_InitStructure.ETH_ReceiveAll = ETH_ReceiveAll_Disable;
+  ETH_InitStructure.ETH_BroadcastFramesReception = ETH_BroadcastFramesReception_Enable;
+  ETH_InitStructure.ETH_PromiscuousMode = ETH_PromiscuousMode_Disable;
+  ETH_InitStructure.ETH_MulticastFramesFilter = ETH_MulticastFramesFilter_Perfect;
+  ETH_InitStructure.ETH_UnicastFramesFilter = ETH_UnicastFramesFilter_Perfect;
+#ifdef CHECKSUM_BY_HARDWARE
+  ETH_InitStructure.ETH_ChecksumOffload = ETH_ChecksumOffload_Enable;
+#endif
+
+  /*------------------------   DMA   -----------------------------------*/  
+  
+  /* When we use the Checksum offload feature, we need to enable the Store and Forward mode: 
+  the store and forward guarantee that a whole frame is stored in the FIFO, so the MAC can insert/verify the checksum, 
+  if the checksum is OK the DMA can handle the frame otherwise the frame is dropped */
+  ETH_InitStructure.ETH_DropTCPIPChecksumErrorFrame = ETH_DropTCPIPChecksumErrorFrame_Enable; 
+  ETH_InitStructure.ETH_ReceiveStoreForward = ETH_ReceiveStoreForward_Enable;         
+  ETH_InitStructure.ETH_TransmitStoreForward = ETH_TransmitStoreForward_Enable;     
+ 
+  ETH_InitStructure.ETH_ForwardErrorFrames = ETH_ForwardErrorFrames_Disable;       
+  ETH_InitStructure.ETH_ForwardUndersizedGoodFrames = ETH_ForwardUndersizedGoodFrames_Disable;   
+  ETH_InitStructure.ETH_SecondFrameOperate = ETH_SecondFrameOperate_Enable;
+  ETH_InitStructure.ETH_AddressAlignedBeats = ETH_AddressAlignedBeats_Enable;      
+  ETH_InitStructure.ETH_FixedBurst = ETH_FixedBurst_Enable;                
+  ETH_InitStructure.ETH_RxDMABurstLength = ETH_RxDMABurstLength_32Beat;          
+  ETH_InitStructure.ETH_TxDMABurstLength = ETH_TxDMABurstLength_32Beat;
+  ETH_InitStructure.ETH_DMAArbitration = ETH_DMAArbitration_RoundRobin_RxTx_2_1;
+
+  /* Configure Ethernet */
+  //EthInitStatus = ETH_Init(&ETH_InitStructure, LAN8720_PHY_ADDRESS);
+  if(ETH_Init_no_loop(&ETH_InitStructure, LAN8720_PHY_ADDRESS))
+  	{
+      EthInitStatus=3;
+    }
+}
+/**
+  * @brief  Configure the PHY to generate an interrupt on change of link status.
+  * @param PHYAddress: external PHY address  
+  * @retval None
+  */
+uint32_t Eth_Link_PHYITConfig(uint16_t PHYAddress)
+{
+  uint32_t tmpreg = 0;
+
+  /* Read MICR register */
+  tmpreg = ETH_ReadPHYRegister(PHYAddress, PHY_MICR);
+
+  /* Enable output interrupt events to signal via the INT pin */
+  tmpreg |= (uint32_t)PHY_MICR_INT_EN;
+  if(!(ETH_WritePHYRegister(PHYAddress, PHY_MICR, tmpreg)))
+  {
+    /* Return ERROR in case of write timeout */
+    return ETH_ERROR;
+  }
+  /* Return SUCCESS */
+  return ETH_SUCCESS;   
+}
+#endif //ETHERNET
 
 #ifndef _RKB_DM8100
 #ifdef POWER_CONSUMPTION	//20121030

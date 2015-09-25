@@ -31,6 +31,9 @@
 #include "power_led.h"
 #include "fan_ctrl.h"
 #include "signal_sense.h"
+#ifdef _ETHERNET
+#include "netconf.h"
+#endif
 //----------------------------------------------------------
 extern void VFDClearDisplay(void);
 
@@ -41,6 +44,7 @@ AK4117_TYPE       AK4117_Data[4];
 VOL_CTRL_TYPE     VOL_Data[4];
 u8                mode_display_update=0;
 u8                volume_send_delay_time;
+u8                adc_mode=0;
 #endif
 const char reconstruct_Table[CONSTRUCT_TABLE_SIZE][4] = { 				//20150820
 
@@ -83,7 +87,34 @@ const char reconstruct_Table[CONSTRUCT_TABLE_SIZE][4] = { 				//20150820
 	0,MAX_INPUT_SEL,INPUT_SEL_INITIAL,	ADDR_AMP_C_INPUTSELMODE,			// input_selMode[2]
 	0,MAX_INPUT_SEL,INPUT_SEL_INITIAL,	ADDR_AMP_D_INPUTSELMODE,			// input_selMode[3]
 
-    0,2,1                            ,  ADDR_POWEROPTION
+    0,2,1                            ,  ADDR_POWEROPTION,         //32
+    
+    0,1,0                            ,  ADDR_A_TONE_SW,
+    0,1,0                            ,  ADDR_B_TONE_SW,
+    0,1,0                            ,  ADDR_C_TONE_SW,
+    0,1,0                            ,  ADDR_D_TONE_SW,           //36
+
+	0,20,10                          ,  ADDR_A_TREB,
+	0,20,10                          ,  ADDR_B_TREB,
+	0,20,10                          ,  ADDR_C_TREB,
+	0,20,10                          ,  ADDR_D_TREB,             //40
+	
+	0,20,10                          ,  ADDR_A_BASS,
+	0,20,10                          ,  ADDR_B_BASS,
+	0,20,10                          ,  ADDR_C_BASS,
+	0,20,10                          ,  ADDR_D_BASS,              //44 
+
+	0,INPUT_A8_B8, INPUT_A1_B1       ,  ADDR_A_LOCAL_SRC,
+	0,INPUT_A8_B8, INPUT_A2_B2       ,  ADDR_B_LOCAL_SRC,
+	0,INPUT_A8_B8, INPUT_A3_B3       ,  ADDR_C_LOCAL_SRC,
+	0,INPUT_A8_B8, INPUT_A4_B4       ,  ADDR_D_LOCAL_SRC,         //48
+
+	0,INPUT_A8_B8, INPUT_A1_B1       ,  ADDR_A_LINK_SRC,
+	0,INPUT_A8_B8, INPUT_A2_B2       ,  ADDR_B_LINK_SRC,
+	0,INPUT_A8_B8, INPUT_A3_B3       ,  ADDR_C_LINK_SRC,
+	0,INPUT_A8_B8, INPUT_A4_B4       ,  ADDR_D_LINK_SRC,          //52	
+
+	0,1          , 1                 ,  ADDR_DHCP_ENABLE          //53
 };
 
 void RKB_channel_initial(void)
@@ -97,7 +128,7 @@ void RKB_channel_initial(void)
 	  RKB_Channel[i].mute_status     = MUTE_ON;
 	  RKB_Channel[i].ak4117_data     = &(AK4117_Data[i]);
 	  RKB_Channel[i].vol_data        = &(VOL_Data[i]);
-	  RKB_Channel[i].digital_analog_stat = 0;
+	  RKB_Channel[i].digital_analog_mode = 0;
 	  RKB_Channel[i].digital_nAnalog = 0;
 	  RKB_Channel[i].local_speaker_src = 0;
 	  RKB_Channel[i].link_channel_src = 0;
@@ -105,12 +136,18 @@ void RKB_channel_initial(void)
 	  RKB_Channel[i].p_ak4117_func            =  ak4117_ctrl;
 	  RKB_Channel[i].p_link_chanel_src_sel    = njw1112_link_speaker_ctrl;
 	  RKB_Channel[i].p_local_speaker_src_sel  = njw1112_local_speaker_ctrl;
+	  
 	  RKB_Channel[i].p_vol_control            = volume_ctrl;
-	  RKB_Channel[i].p_digital_nAnalog_sw     = njm2752_ctrl;
+	  RKB_Channel[i].p_vol_ctrl_l             = njw1194_vol_ctrl_l;
+	  RKB_Channel[i].p_vol_ctrl_r             = njw1194_vol_ctrl_r;
+	  
+	  RKB_Channel[i].p_digital_nAnalog_sw     = njm2752_ctrl;	  
 	  RKB_Channel[i].p_treb_control           = njw1194_treble_ctrl;
 	  RKB_Channel[i].p_bass_control           = njw1194_bass_ctrl;
 	  RKB_Channel[i].p_balance_contrl         = njw1194_balance_ctrl;
 	  RKB_Channel[i].p_mute_ctrl              = volume_mute_ctrl;
+	  RKB_Channel[i].p_tone_control           = njw1194_tone_switch;
+	  RKB_Channel[i].p_eeprom_write           = nvr_xPutData;
    	}
 }
 /*
@@ -188,23 +225,42 @@ u8 Check_Backup(void)
 		   power_status.smps_shut_down_temp = (u8)nvr_xGetData(ADDR_SMPS_SHUTDOWN_TEMP);
 
 		   //channel a~d configuration
-           for(i=CHANNEL_A;i<CHANNEL_D+1;i++)
+           for(i=CHANNEL_A;i<=CHANNEL_D;i++)
            	{
               RKB_Channel[i].amp_channel_on     = (u8)nvr_xGetData(ADDR_AMP_A_ONOFF+i);
 			  RKB_Channel[i].vol_data->vol_left = (u8)nvr_xGetData(ADDR_A_VOL_LCH+i);
 			  RKB_Channel[i].vol_data->vol_right= (u8)nvr_xGetData(ADDR_A_VOL_RCH+i);
 			  RKB_Channel[i].vol_data->balance  = (u8)nvr_xGetData(ADDR_A_BAL+i);
 			  RKB_Channel[i].digital_analog_mode = (u8)nvr_xGetData(ADDR_AMP_A_INPUTSELMODE+i);
+			  RKB_Channel[i].vol_data->tone_sw   = (u8)nvr_xGetData(ADDR_A_TONE_SW+i);
+			  RKB_Channel[i].vol_data->treb_level= (u8)nvr_xGetData(ADDR_A_TREB+i);
+			  RKB_Channel[i].vol_data->bass_level= (u8)nvr_xGetData(ADDR_A_BASS+i);
+			  RKB_Channel[i].local_speaker_src   = (u8)nvr_xGetData(ADDR_A_LOCAL_SRC+i);
+			  RKB_Channel[i].link_channel_src    = (u8)nvr_xGetData(ADDR_A_LINK_SRC+i);
 		    }
 
            //power mode
            power_status.power_mode = (u8) nvr_xGetData(ADDR_POWEROPTION);
 
-		   //display update mode
-
-		   
+#ifdef _ETHERNET
+		   //ethernet data
+		   mode_dhcp_enable=(u8) nvr_xGetData(ADDR_DHCP_ENABLE);
+		   for(i=0;i<4;i++)
+		   	{
+		      manual_ip_addr[i] = (u8)nvr_xGetData(ADDR_USER_IP_ADDR+i);
+			  manual_subnet_mask[i] = (u8)nvr_xGetData(ADDR_USER_SUBNET_MASK+i);
+			  manual_gateway_addr[i] = (u8)nvr_xGetData(ADDR_USER_IP_ADDR+i);
+			  manual_dns[i]          = (u8)nvr_xGetData(ADDR_USER_DNS+i);
+		   	}
+		   for(i=0;i<6;i++)
+		   	{
+              mac_address[i]=(u8)nvr_xGetData(MAC_ADDR+i);
+              //mac_address[i]=0x00;
+		    }
+#endif
            		   
 	       backup_range_check(1);
+		   //ethernet_backup_check();
 
 		   result = TRUE;
 		   
@@ -237,16 +293,24 @@ void backup_range_check(u8 type)
 	backup_reconstruct(10,	&(fan_status.fan_ls_on_amp_temp),type);		//20140521
 	backup_reconstruct(11,	&(fan_status.fan_ls_off_amp_temp),type);		//20140521
 
-    for(i=CHANNEL_A;i<CHANNEL_D+1;i++)
+    for(i=CHANNEL_A;i<=CHANNEL_D;i++)
     	{
           backup_reconstruct(12+i,&(RKB_Channel[i].amp_channel_on),type);
 		  backup_reconstruct(16+i,&(RKB_Channel[i].vol_data->vol_left),type);
 		  backup_reconstruct(20+i,&(RKB_Channel[i].vol_data->vol_right),type);
 		  backup_reconstruct(24+i,&(RKB_Channel[i].vol_data->balance),type);
-		  backup_reconstruct(28+i,&(RKB_Channel[i].digital_nAnalog),type);
+		  backup_reconstruct(28+i,&(RKB_Channel[i].digital_analog_mode),type);
+		  backup_reconstruct(33+i,&(RKB_Channel[i].vol_data->tone_sw),type);
+		  backup_reconstruct(37+i,&(RKB_Channel[i].vol_data->treb_level),type);
+		  backup_reconstruct(41+i,&(RKB_Channel[i].vol_data->bass_level),type);
+		  backup_reconstruct(45+i,&(RKB_Channel[i].local_speaker_src),type);
+		  backup_reconstruct(49+i,&(RKB_Channel[i].link_channel_src),type);
 	    }
 	
    backup_reconstruct(32,&(power_status.power_mode),type); 
+#ifdef _ETHERNET
+   backup_reconstruct(53,&mode_dhcp_enable,type);
+#endif
    //backup_reconstruct();
 }
 void backup_reconstruct(unsigned char i, unsigned char *addr,unsigned char flag)
@@ -269,10 +333,56 @@ void backup_reconstruct(unsigned char i, unsigned char *addr,unsigned char flag)
 
 void reload_default_configuration(void)
 {
-   u8 val=0xA5;
-   backup_range_check(0);  //reload the default data					
-   nvr_xPutData(ADDR_CHECKRAM,val);  
+    u8 val=0xA5;
+    backup_range_check(0);  //reload the default data	
+
+#ifdef _ETHERNET
+    ethernet_backup_default();
+#endif
+    nvr_xPutData(ADDR_CHECKRAM,val);  
 }
+
+#ifdef _ETHERNET
+void ethernet_backup_default(void)
+{
+    u8 i;
+    //manual IP address : 192.168.3.2
+    manual_ip_addr[0]=192;
+	manual_ip_addr[1]=168;
+	manual_ip_addr[2]=3;
+	manual_ip_addr[3]=2;
+
+	//manual subnet mask : 255.255.255.0
+	manual_subnet_mask[0]=255;
+	manual_subnet_mask[1]=255;
+	manual_subnet_mask[2]=255;
+	manual_subnet_mask[3]=0;
+
+	//manual Gateway address : 192.168.3.1
+	manual_gateway_addr[0]=192;
+	manual_gateway_addr[1]=168;
+	manual_gateway_addr[2]=3;
+	manual_gateway_addr[3]=1;
+
+	//manual DNS : 192.168.3.1
+	manual_dns[0]=192;
+	manual_dns[1]=168;
+	manual_dns[2]=3;
+	manual_dns[3]=1;
+
+    for(i=0;i<4;i++)
+    	{
+          nvr_xPutData(ADDR_USER_IP_ADDR+i,    manual_ip_addr[i]);
+		  nvr_xPutData(ADDR_USER_SUBNET_MASK+i,manual_subnet_mask[i]);
+		  nvr_xPutData(ADDR_USER_GATEWAY_ADDR+i,manual_gateway_addr[i]);
+		  nvr_xPutData(ADDR_USER_DNS+i,manual_dns[i]);
+	    }
+	for(i=0;i<6;i++)
+		{
+          mac_address[i]=nvr_xGetData(MAC_ADDR+i);
+	    }
+}
+#endif
 void mode_reset(void)
 {
    reload_default_configuration();
@@ -378,12 +488,12 @@ void mode_amp_protection_check(void)
 	   	           amp_protection_on();
        	        }
             }
-          else if(get_amp_n_err)
+          else if(!get_amp_n_err)
 	          {
 	            if(++(amp_status.check_timer)>AMP_CHECK_TIME)
 	   	          {
                      //amp_status.protect_status = AMP_PROTECT_ON;    //OFF--amp no error
-                     //if amp error pin is high
+                     //if amp error pin is LOW
                      amp_protection_on();
 	   	          }
 	           }
@@ -407,7 +517,7 @@ void mode_amp_protection_check(void)
       }
 	else 
 		{
-           if(get_amp_n_ready==0 && get_amp_n_err == 0)
+           if(get_amp_n_ready==0 && get_amp_n_err)
            	{
                if(++(amp_status.check_timer)>AMP_CHECK_TIME)
                	{
@@ -433,35 +543,44 @@ void mode_ak4117_check(void)
 	RKB_Channel[CHANNEL_B].p_ak4117_func(&RKB_Channel[CHANNEL_B]);
 	RKB_Channel[CHANNEL_C].p_ak4117_func(&RKB_Channel[CHANNEL_C]);
 	RKB_Channel[CHANNEL_D].p_ak4117_func(&RKB_Channel[CHANNEL_D]);
-
-	//s_4114_Exec(0);
-	//s_4114_Exec(1);
-	//s_4114_Exec(2);
-	//s_4114_Exec(3);
 }
 void mode_input_check(void)
 {
     u8 i;
-	for(i=CHANNEL_A;i<CHANNEL_D;i++)
+	u8 state;
+
+	for(i=CHANNEL_A;i<=CHANNEL_D;i++)
 		{
+		  state=RKB_Channel[i].digital_nAnalog;
 		  switch(RKB_Channel[i].digital_analog_mode)
     	    {
     	     case INPUT_MODE_AUTO:
                   switch(RKB_Channel[i].ak4117_data->pll_status)
                   	{
 			  	       case PLL_LOCK:
+					   	  if(state == 1) break;
+						  
                           RKB_Channel[i].p_digital_nAnalog_sw(&RKB_Channel[i],1);  //auto switch to digital
+                          nvr_xPutData(ADDR_AMP_A_INPUTSELMODE+i, 1);
                          break;
 				       case PLL_UNLOCK:
-				          RKB_Channel[i].p_digital_nAnalog_sw(&RKB_Channel[i],0);  //auto switch to analog	
+					   	  if(state == 0) break;
+						  
+				          RKB_Channel[i].p_digital_nAnalog_sw(&RKB_Channel[i],0);  //auto switch to analog
+				          nvr_xPutData(ADDR_AMP_A_INPUTSELMODE+i, 0);
 				         break;
                   	}
 			   break;
 			 case INPUT_MODE_ANALOG:
-			 	RKB_Channel[i].p_digital_nAnalog_sw(&RKB_Channel[i],0);  //auto switch to analog	
+			 	if(state == 0) break;
+				
+			 	RKB_Channel[i].p_digital_nAnalog_sw(&RKB_Channel[i],0);  //auto switch to analog
+			 	nvr_xPutData(ADDR_AMP_A_INPUTSELMODE+i, 0);
 			   break;
 			 case INPUT_MODE_DIGITAL:
+			 	if(state == 1) break;
 			 	RKB_Channel[i].p_digital_nAnalog_sw(&RKB_Channel[i],1);  //auto switch to digital
+			 	nvr_xPutData(ADDR_AMP_A_INPUTSELMODE+i, 1);
 			   break;
 			  
 	        }
@@ -480,12 +599,12 @@ void mode_status_initial(void)
 	njw1194_write_start();
 
 	for(i=CHANNEL_A;i<=CHANNEL_D;i++)
-		{
+		{		
 		  //set the volume
 	      if(RKB_Channel[i].vol_data->vol_left == RKB_Channel[i].vol_data->vol_right)
 	      	{
               RKB_Channel[i].vol_data->vol=RKB_Channel[i].vol_data->vol_left;
-			  RKB_Channel[i].p_vol_control(&RKB_Channel[i],RKB_Channel[i].vol_data->vol);
+			  RKB_Channel[i].p_vol_control(&RKB_Channel[i],VOL_ALL,DIR_HOLD,RKB_Channel[i].vol_data->vol);
 		    }
 		  else
 		  	{
@@ -500,13 +619,24 @@ void mode_status_initial(void)
 		  RKB_Channel[i].p_link_chanel_src_sel(&RKB_Channel[i],RKB_Channel[i].link_channel_src);
 
           //set the tone control
+          
+		  //set the bass
+		  RKB_Channel[i].p_bass_control(&RKB_Channel[i],DIR_DIRECT,RKB_Channel[i].vol_data->bass_level);
+		  //set the treb
+	      RKB_Channel[i].p_treb_control(&RKB_Channel[i],DIR_DIRECT,RKB_Channel[i].vol_data->treb_level);
+          //set the tone switch
           if(RKB_Channel[i].vol_data->tone_sw == TONE_ON)
           	{
-		      //set the bass
-		      RKB_Channel[i].p_bass_control(&RKB_Channel[i],RKB_Channel[i].vol_data->bass_level);
-			  //set the treb
-			  RKB_Channel[i].p_treb_control(&RKB_Channel[i],RKB_Channel[i].vol_data->treb_level);
-
+	          RKB_Channel[i].p_tone_control(&RKB_Channel[i],TONE_ON);
           	}
+		  else
+		  	{
+              RKB_Channel[i].p_tone_control(&RKB_Channel[i],TONE_OFF);
+		    }
+
+		  RKB_Channel[i].p_mute_ctrl(&RKB_Channel[i],MUTE_OFF);
+
+		  RKB_Channel[i].p_digital_nAnalog_sw(&RKB_Channel[i],RKB_Channel[i].digital_nAnalog);
 		}
+	power_stable();
 }

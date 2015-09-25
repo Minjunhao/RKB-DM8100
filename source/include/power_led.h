@@ -12,8 +12,11 @@
 #define AMP_POWER_OFF    0
 #define AMP_POWER_ON     1
 
-#define MAIN_POWER_OFF   0
-#define MAIN_POWER_ON    1
+#define MAIN_POWER_OFF      0
+#define MAIN_POWER_ON       2
+#define MAIN_POWER_INITIAL  1
+
+#define FLAG_POWER_STATUS   0x80
 typedef struct{
   unsigned char power_mode;
   unsigned char pwr_check_timer;
@@ -23,6 +26,7 @@ typedef struct{
   unsigned char amp_power_status;
   unsigned char amp_shut_down_temp;    //the temperature of shutting down the amp
   unsigned char smps_shut_down_temp;   //the temperature of shutting down the SMPS
+  unsigned char flag;
 } POWER_TYPE;
 
 typedef struct{
@@ -49,4 +53,7 @@ void power_status_initial(void);
 void led_status_initial(void);
 void pwr_led_on(void);
 void pwr_led_off(void);
+void power_stable(void);
+void mode_power_standy_on(void);
+void SMPS_On(void);
 #endif

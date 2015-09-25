@@ -41,23 +41,38 @@ typedef enum
   STATIC_IP_CONFIGURED
 }
 STATIC_STATE_TYPEDEF;
+extern DHCP_State_TypeDef DHCP_state;
 extern STATIC_STATE_TYPEDEF STATIC_state;
 extern unsigned char iptab[4];
 extern unsigned char iptxt[20];   
 extern DHCP_State_TypeDef DHCP_state;
+extern u8 dhcp_ip_addr[4];
+extern u8 dhcp_subnet_mask[4];
+extern u8 dhcp_gateway_addr[4];
+extern u8 dhcp_dns[4];
+extern u8 mode_dhcp_enable;
+extern u8 mac_address[6];
+
+extern u8 manual_ip_addr[4];
+extern u8 manual_subnet_mask[4];
+extern u8 manual_gateway_addr[4];
+extern u8 manual_dns[4];
 /* Includes ------------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void LwIP_Init(void);
-void Service_Restart(void);
+void service_restart(void);
 void LwIP_Pkt_Handle(void);
 void LwIP_Periodic_Handle(__IO uint32_t localtime);
 void EthernetMain(void);
 void EthernetStandy(void);
 void EthernetRestartLwIP(void);
 void CloseConnection(struct tcp_pcb *pcb);
+void EthernetRestartLwIP(void);
+void ethernet_configuration(void);
+void ethernet_dma_reset(void);
 
 #ifdef __cplusplus
 }

@@ -49,6 +49,9 @@ extern byte    u8column;
 #ifdef IAP_UPGRADE
 extern WORD EEP_Wait;
 #endif
+#ifdef _ETHERNET
+__IO u32 LocalTime = 0;
+#endif
 /*-----------------------------------------------------------------------------
  Function Name  : timer1_CC_IRQHandler
  Description    : spi1 interrupt handler
@@ -111,6 +114,9 @@ void timer_SysTickHandler(void)
 	Timer250ms++;
 	Timer500ms++;			
 
+	#ifdef _ETHERNET
+	LocalTime++;
+	#endif
 #ifdef IAP_UPGRADE
 	if (EEP_Wait!=0)EEP_Wait--;
 #endif		

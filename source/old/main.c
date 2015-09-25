@@ -64,7 +64,6 @@ u32 		JumpAddress;
 #endif
 
 extern const byte tbl_ascii[];
-extern void __iar_program_start( void );		//20131203
 
 
 /*----------------------------------------------------------------------------*/
@@ -4212,6 +4211,8 @@ const char reconstruct_Table[14+16+4][3] = { 				//20150302
 	0,MAX_INPUT_SEL,INPUT_SEL_INITIAL,				// input_selMode[2]
 	0,MAX_INPUT_SEL,INPUT_SEL_INITIAL				// input_selMode[3]
 //+4
+
+
 };
 void backup_reconstruct(unsigned char i, unsigned char *addr)
 {

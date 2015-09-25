@@ -157,6 +157,8 @@ DESCRIPTION     :
 
 #define COUNT_ENCCOUNT	TIME10MSTO50MS
 
+extern __IO u32 LocalTime;
+
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void timer1_UP_IRQHandler(void);

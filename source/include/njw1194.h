@@ -14,6 +14,7 @@
 #define DIR_HOLD                            0
 #define DIR_UP                              1
 #define DIR_DOWN                            2
+#define DIR_DIRECT                          3
 
 #define VOLUME_MUTE_VAL                     0
 #define VOLUME_MAX_VAL                      255
@@ -33,10 +34,14 @@
 #define INPUT_MUTE                          0x00
 #define INPUT_A                             0x04
 
-void njw1194_treble_ctrl(Channel_TYPE *chunnel,u8 dir);
-void njw1194_bass_ctrl(Channel_TYPE *chunnel,u8 dir);
-void njw1194_balance_ctrl(Channel_TYPE *chunnel,u8 dir);
+void njw1194_treble_ctrl(Channel_TYPE *chunnel,u8 dir,u8 val);
+void njw1194_bass_ctrl(Channel_TYPE *chunnel,u8 dir,u8 val);
+void njw1194_balance_ctrl(Channel_TYPE *chunnel,u8 dir,u8 data);
 void njw1194_vol_ctrl(Channel_TYPE *chunnel,u8 volume);
 void volume_ctrl(Channel_TYPE *chunnel,u8 left_or_right,u8 direct,u8 set_volume);
 void volume_mute_ctrl(Channel_TYPE *chunnel,u8 stat);
+void njw1194_write_start(void);
+void njw1194_tone_switch(Channel_TYPE *chunnel,u8 tone_val);
+void njw1194_vol_ctrl_l(Channel_TYPE *chunnel,u8 volume);
+void njw1194_vol_ctrl_r(Channel_TYPE *chunnel,u8 volume);
 #endif //_NJW1194

@@ -1,6 +1,13 @@
----- tone_sw Matches (6 in 3 files) ----
-Njw1194.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):	   	//if(chunnel->vol_data->tone_sw == TONE_ON)
-Njw1194.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):	   	chunnel->vol_data->tone_sw = !(chunnel->vol_data->tone_sw);  //TONE ON/OFF
-Njw1194.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):   temp_tone_sw=chunnel->vol_data->tone_sw;
-Proc_function.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):          if(RKB_Channel[i].vol_data->tone_sw == TONE_ON)
-Proc_function.h (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source\include):  unsigned char tone_sw;
+---- p_local_speaker_src_sel Matches (12 in 4 files) ----
+Command_key.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):		   	RKB_Channel[chnl].p_local_speaker_src_sel(&RKB_Channel[chnl],INPUT_A1_B1);
+Command_key.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):		   	RKB_Channel[chnl].p_local_speaker_src_sel(&RKB_Channel[chnl],INPUT_A2_B2);
+Command_key.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):		   	RKB_Channel[chnl].p_local_speaker_src_sel(&RKB_Channel[chnl],INPUT_A3_B3);
+Command_key.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):		   	RKB_Channel[chnl].p_local_speaker_src_sel(&RKB_Channel[chnl],INPUT_A4_B4);
+Command_key.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):		   	RKB_Channel[chnl].p_local_speaker_src_sel(&RKB_Channel[chnl],INPUT_A5_B5);
+Command_key.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):		   	RKB_Channel[chnl].p_local_speaker_src_sel(&RKB_Channel[chnl],INPUT_A6_B6);
+Command_key.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):		   	RKB_Channel[chnl].p_local_speaker_src_sel(&RKB_Channel[chnl],INPUT_A7_B7);
+Command_key.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):		   	RKB_Channel[chnl].p_local_speaker_src_sel(&RKB_Channel[chnl],INPUT_A8_B8);
+Main.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):	  RKB_Channel[i].p_local_speaker_src_sel(&RKB_Channel[i],INPUT_A1_B1+i);
+Proc_function.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):	  RKB_Channel[i].p_local_speaker_src_sel  = njw1112_local_speaker_ctrl;
+Proc_function.c (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source):		  RKB_Channel[i].p_local_speaker_src_sel(&RKB_Channel[i],RKB_Channel[i].local_speaker_src);
+Proc_function.h (d:\my document\iar embedded workbench\stm32f2xx\project\rkb-dm8100\source\include):  void (*p_local_speaker_src_sel)(struct channel *,unsigned char);

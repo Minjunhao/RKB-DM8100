@@ -37,6 +37,15 @@
 **********************************************************/
 #define _RKB_DM8100
 //#define _TEST
+#define _ETH_TEST
+#ifdef _ETH_TEST
+#define PORTG_PORT				GPIOG    
+#define MAIN_STBY1				GPIO_Pin_2			//144_34 => when boot mode, STBY_Relay port not so good, so change to this pin
+#define Standby_34(x)			( (x==1)? GPIO_SetBits(PORTG_PORT, MAIN_STBY1) : GPIO_ResetBits(PORTG_PORT, MAIN_STBY1) );
+#endif
+#define IAP_UPGRADE
+//#define _IWDG_ENABLE                          //IWDG for the LWIP trap in the endless loop
+#define _ETHERNET
 #define UART4_ENABLE
 #define UART5_ENABLE
 #define FROM_MP2_CHANGE_TEMP					//20140731 : from MP2(add Signal Sensing Mode) change to newTemp.
@@ -62,7 +71,7 @@
 
 //#define 	IAP_UPGRADE                 //for iAP upgrade
 #define 	AMP_POWERON_ENABLE          //20121011 : 
-#define     _TEST
+//#define     _TEST
 //
 //
 //  test for RA1570 2 Line iPod display
@@ -383,11 +392,31 @@ ASCii Rotel-Link
 #define SK_RMC_4			39		
 #define SK_RMC_5			40		
 #define SK_RMC_6			41		
+	
+
+#ifdef _RKB_DM8100
+#define SK_SET_STATIC_IP    42
+#define SK_SET_STATIC_GATEWAY 43
+#define SK_SET_STATIC_SUBNETMASK 44
+#define SK_SET_STATIC_DNS        45   
+#define SK_GET_IPADDRESS	46		 
+#define SK_GET_SUBNETMASK	47		
+#define SK_GET_GATEWAY		48		
+#define SK_GET_DNSSERVER	49		 
+#define SK_GET_IPMODE		50		
+
+#define SK_IPMODE_DHCP		51		 
+#define SK_IPMODE_STATIC	52		
+#define SK_NETWORK_STATUS	53		
+#define SK_IP_REFRESH		54		 
+#define SK_SET_MAC_ADDR     55
+#define SK_GET_MAC_ADDR     56
+#else
+#define SK_RMC_6			41		
 #define SK_RMC_7			42		
 #define SK_RMC_8			43		
 #define SK_RMC_9			44		
-#define SK_RMC_10			45		
-
+#define SK_RMC_10			45	
 #define SK_CD_0				46
 #define SK_CD_1				47		//long key
 #define SK_CD_2				48		//long key
@@ -399,6 +428,7 @@ ASCii Rotel-Link
 #define SK_CD_8				54		
 #define SK_CD_9				55		
 #define SK_CD_10			56		
+#endif
 
 
 #define SK_CD_PROG			57		
@@ -526,6 +556,7 @@ ASCii Rotel-Link
 #define SK_GET_DIMMER		170 	//20120328  : rotel link "get_dimmer!"
 #define SK_RCD              171 	//20120328  : rotel link "rcd!"
 //
+
 #define SK_BAL_XLR			172		//20120612 : RA1570 : balanced XLR input
 #define SK_BASS             173		//20120316 : RA1570 : 
 #define SK_TREBLE			174		//20120316 : RA1570 : 
@@ -537,6 +568,7 @@ ASCii Rotel-Link
 #define SK_GET_PCUSB_CLASS  180		//20130128 : RA1570 : 
 #define SK_PCUSB_CLASS_1    181		//20130128 : RA1570 : 
 #define SK_PCUSB_CLASS_2    182		//20130128 : RA1570 : 
+
 #define SK_TC_VERSION       183		//20130130 : RA1570 : 
 #define SK_GET_FREQ         184		//20130131 : RA1570 : 
 //
@@ -622,6 +654,8 @@ ASCii Rotel-Link
 #define SK_LINK_INPUT_C             250
 #define SK_LINK_INPUT_D             251
 
+#define SK_BALANCE_0                252
+
 #define SK_REFRESH			0xff	//255
 
 
@@ -685,6 +719,32 @@ ASCii Rotel-Link
 #define ADDR_AMP_B_INPUTSELMODE			0x31			//AMP A input sel mode [AUTO/DIGITAL/ANALOG]
 #define ADDR_AMP_C_INPUTSELMODE			0x32			//AMP A input sel mode [AUTO/DIGITAL/ANALOG]
 #define ADDR_AMP_D_INPUTSELMODE			0x33			//AMP A input sel mode [AUTO/DIGITAL/ANALOG]
+
+#define ADDR_A_TONE_SW                  0x34
+#define ADDR_B_TONE_SW                  0x35
+#define ADDR_C_TONE_SW                  0x36
+#define ADDR_D_TONE_SW                  0x37
+
+#define ADDR_A_TREB                     0x38
+#define ADDR_B_TREB                     0x39
+#define ADDR_C_TREB                     0x3a
+#define ADDR_D_TREB                     0x3b
+
+#define ADDR_A_BASS                     0x3c
+#define ADDR_B_BASS                     0x3d
+#define ADDR_C_BASS                     0x3e
+#define ADDR_D_BASS                     0x3f
+
+#define ADDR_A_LOCAL_SRC                0x40
+#define ADDR_B_LOCAL_SRC                0x41
+#define ADDR_C_LOCAL_SRC                0x42
+#define ADDR_D_LOCAL_SRC                0x43
+
+#define ADDR_A_LINK_SRC                 0x44
+#define ADDR_B_LINK_SRC                 0x45
+#define ADDR_C_LINK_SRC                 0x46
+#define ADDR_D_LINK_SRC                 0x47
+#define ADDR_DHCP_ENABLE                0x48
 //
 /**********************************************************/
 #define ADDR_CHECKRAM					0x50				//backup ? 0xaa->0x55->0x5a
@@ -702,9 +762,23 @@ ASCii Rotel-Link
 //20140515
 #define ADDR_OPTI_POWER_MODE			0x58		//20140515 : OPTICAL POWER MODE
 
+
 #define ADDR_DUMMYDUMMY					0x5d	    //eeprom address change
 
+#define ADDR_USER_IP_ADDR               0x60
+#define ADDR_USER_SUBNET_MASK           0x64
+#define ADDR_USER_GATEWAY_ADDR          0x68
+#define ADDR_USER_DNS                   0x6c
 
+//0x70~0x75 mac address
+#define MAC_ADDR                        0x70
+
+
+
+#define LAN8720_PHY_ADDRESS    0x00
+#define USE_DHCP
+
+extern u16 task_initialize_time;
 
 
 void 	rs232_Key_Init(void);

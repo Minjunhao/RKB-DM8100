@@ -130,8 +130,9 @@ typedef	struct Key_t{
 //
 #define STM_MEMORY			0x7e
 
-extern unsigned char current_key[8];
+extern unsigned char current_key[4];
 extern vu16 ADC_Val[4];
+extern vu16 current_ADC_Val[4];
 /*----------------------------------------------------------------------------*/
 void adc_KeyRestart(unsigned char i);							//20130527
 void adc_KeyInit(void);

@@ -15,6 +15,9 @@
 #define FAN_LS_HS_ON              4                //both on
 
 
+#define F_SMPS_TEMP               0x80
+#define F_AMP_TEMP                0x40
+#define F_TEMP_CHANGE             0x20
 #define FAN_HS_ON_TEST(x)  (((x)>=FAN_HS_ON_DEGREE)? (FAN_LS_HS_ON:FAN_HS_STAY)
 #define FAN_HS_OFF_TEST(x) (((x)>=FAN_HS_OFF_DEGREE)? (FAN_HS_ON_TEST(x)):FAN_LS_ON) 
 #define FAN_LS_ON_TEST(x)  (((x)>=FAN_LS_ON_DEGREE)? (FAN_HS_OFF_TEST(x)):FAN_LS_STAY)
@@ -34,6 +37,7 @@ typedef struct{
 
   unsigned char fan_on_smps_temp;
   unsigned char fan_off_smps_temp;
+  unsigned char flag;
   
 } FAN_STATUS;
 
